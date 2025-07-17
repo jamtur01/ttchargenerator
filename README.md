@@ -35,3 +35,17 @@ Open `index.html` in a web browser.
 - Follows official T&T 8th Edition rules
 - PDF export uses browser print function
 - Character data saved as JSON
+
+## License
+
+MIT License - see LICENSE file for details
+
+Copyright (c) 2025 James Turnbull
+
+## Legal Notice
+
+Tunnels & Trolls™ and Deluxe Tunnels & Trolls™ are trademarks of Flying Buffalo Inc.
+
+© 2015 Ken St Andre, Liz Danforth, Rick Loomis, Steven Crompton & Jim Peters. All rights reserved.
+
+This character generator is an unofficial fan tool. Visit [www.flyingbuffalo.com](https://www.flyingbuffalo.com) for official T&T products.
