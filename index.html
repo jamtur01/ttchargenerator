@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tunnels & Trolls Character Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Cinzel:wght@600;900&family=Uncial+Antiqua&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>Tunnels & Trolls Character Generator</h1>
+        <p>Create your T&T character</p>
+      </header>
+
+      <main class="character-sheet">
+        <!-- Documentation Section -->
+        <section class="documentation" id="help-section" style="display: none">
+          <h4>Quick Guide</h4>
+          <ul>
+            <li>
+              <strong>TARO (Triples Add and Roll Over):</strong> When you roll
+              triples (e.g., 3,3,3) for any attribute, you're a Specialist! Keep
+              rolling and adding until you don't get triples.
+            </li>
+            <li>
+              <strong>Personal Adds:</strong> Only STR, DEX, SPD, and LK above
+              12 contribute (+1 per point over 12)
+            </li>
+            <li>
+              <strong>Kindred Modifiers:</strong> Non-humans use multiplicative
+              modifiers (e.g., Dwarves get 2× STR)
+            </li>
+            <li><strong>Starting Gold:</strong> 3d6 × 10 gold pieces</li>
+            <li>
+              <strong>Talents:</strong> All characters start with 1 talent,
+              Rogues get 2. +3 bonus to specific saving rolls.
+            </li>
+          </ul>
+        </section>
+
+        <section class="character-info">
+          <h2>Character Information</h2>
+          <div class="info-grid">
+            <div class="field">
+              <label for="name">Name:</label>
+              <input type="text" id="name" placeholder="Enter character name" />
+            </div>
+            <div class="field">
+              <label
+                for="kindred"
+                title="Different kindreds have multiplicative attribute modifiers"
+                >Kindred:</label
+              >
+              <select id="kindred">
+                <option value="">Select Kindred</option>
+                <option
+                  value="human"
+                  title="1× all attributes, second chance on failed saving rolls"
+                >
+                  Human
+                </option>
+                <option
+                  value="dwarf"
+                  title="2× STR & CON, 0.75× LK, 0.67× height, 2× weight"
+                >
+                  Dwarf
+                </option>
+                <option
+                  value="elf"
+                  title="0.67× CON, 1.33× DEX, 1.5× IQ/WIZ/CHA, 1.10× height"
+                >
+                  Elf
+                </option>
+                <option
+                  value="hobb"
+                  title="0.5× STR, 2× CON, 1.5× DEX/LK, 0.5× height, 0.75× weight"
+                >
+                  Hobb
+                </option>
+                <option
+                  value="fairy"
+                  title="0.25× STR/CON, 1.75× DEX, 1.5× LK/CHA, 2× WIZ, 0.10× height, 0.01× weight"
+                >
+                  Fairy
+                </option>
+                <option
+                  value="leprechaun"
+                  title="0.33× STR, 0.67× CON, 1.5× DEX/LK/WIZ, 1.25× IQ, 0.33× height, 0.10× weight"
+                >
+                  Leprechaun
+                </option>
+              </select>
+            </div>
+            <div class="field">
+              <label
+                for="class"
+                title="Your character's profession determines abilities and limitations"
+                >Class:</label
+              >
+              <select id="class">
+                <option value="">Select Class</option>
+                <option
+                  value="warrior"
+                  title="Weapon/armor bonuses, no magic ability"
+                >
+                  Warrior
+                </option>
+                <option
+                  value="rogue"
+                  title="Can use weapons and magic, starts with 2 talents"
+                >
+                  Rogue
+                </option>
+                <option
+                  value="wizard"
+                  title="Knows all 1st level spells, limited to 2d6 weapons"
+                >
+                  Wizard
+                </option>
+                <option
+                  value="citizen"
+                  title="Average person, no special training"
+                >
+                  Citizen
+                </option>
+                <option
+                  value="specialist"
+                  title="Must roll triples on an attribute, has exceptional abilities"
+                >
+                  Specialist
+                </option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="gender">Gender:</label>
+              <select id="gender">
+                <option value="">Select Gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="age">Age:</label>
+              <input type="number" id="age" min="1" max="999" />
+            </div>
+            <div class="field">
+              <label
+                for="height"
+                title="Roll 3d6 on height/weight table or choose"
+                >Height:</label
+              >
+              <input type="text" id="height" placeholder="e.g., 5'10&quot;" />
+            </div>
+            <div class="field">
+              <label for="weight" title="Weight in pounds">Weight:</label>
+              <input type="number" id="weight" min="1" max="999" />
+            </div>
+            <div class="field">
+              <label for="level" title="Character experience level"
+                >Level:</label
+              >
+              <input type="number" id="level" value="1" min="1" max="50" />
+            </div>
+          </div>
+        </section>
+
+        <section class="attributes">
+          <h2>Attributes</h2>
+          <div class="attributes-grid">
+            <div class="attribute-header">Attribute</div>
+            <div class="attribute-header">Current</div>
+            <div class="attribute-header">Max</div>
+            <div class="attribute-header">Modifier</div>
+
+            <div
+              class="attribute-name"
+              title="Strength: Physical power, weapon requirements, carrying capacity"
+            >
+              STR (Strength)
+            </div>
+            <input
+              type="number"
+              id="str-current"
+              class="attribute-input"
+              min="1"
+              max="999"
+            />
+            <input
+              type="number"
+              id="str-max"
+              class="attribute-input"
+              min="1"
+              max="999"
+            />
+            <span id="str-modifier" class="modifier">+0</span>
+
+            <div
+              class="attribute-name"
+              title="Constitution: Health, endurance, damage capacity"
+            >
+              CON (Constitution)
+            </div>
+            <input
+              type="number"
+              id="con-current"
+              class="attribute-input"
+              min="1"
+              max="999"
+            />
+            <input
+              type="number"
+              id="con-max"
+              class="attribute-input"
+              min="1"
+              max="999"
+            />
+            <span id="con-modifier" class="modifier">+0</span>
+
+            <div
+              class="attribute-name"
+              title="Dexterity: Manual dexterity, agility, marksmanship"
+            >
+              DEX (Dexterity)
+            </div>
+            <input
+              type="number"
+              id="dex-current"
+              class="attribute-input"
+              min="1"
+              max="999"
+            />
+            <input
+              type="number"
+              id="dex-max"
+              class="attribute-input"
+              min="1"
+              max="999"
+            />
+            <span id="dex-modifier" class="modifier">+0</span>
+
+            <div
+              class="attribute-name"
+              title="Speed: Reflexes, reaction time, combat initiative"
+            >
+              SPD (Speed)
+            </div>
+            <input
+              type="number"
+              id="spd-current"
+              class="attribute-input"
+              min="1"
+              max="999"
+            />
+            <input
+              type="number"
+              id="spd-max"
+              class="attribute-input"
+              min="1"
+              max="999"
+            />
+            <span id="spd-modifier" class="modifier">+0</span>
+
+            <div
+              class="attribute-name"
+              title="Luck: Fortune, chance, combat effectiveness"
+            >
+              LK (Luck)
+            </div>
+            <input
+              type="number"
+              id="lk-current"
+              class="attribute-input"
+              min="1"
+              max="999"
+            />
+            <input
+              type="number"
+              id="lk-max"
+              class="attribute-input"
+              min="1"
+              max="999"
+            />
+            <span id="lk-modifier" class="modifier">+0</span>
+
+            <div
+              class="attribute-name"
+              title="Intelligence: Reasoning, memory, problem-solving, spell requirements"
+            >
+              IQ (Intelligence)
+            </div>
+            <input
+              type="number"
+              id="iq-current"
+              class="attribute-input"
+              min="1"
+              max="999"
+            />
+            <input
+              type="number"
+              id="iq-max"
+              class="attribute-input"
+              min="1"
+              max="999"
+            />
+            <span id="iq-modifier" class="modifier">+0</span>
+
+            <div
+              class="attribute-name"
+              title="Wizardry: Magical capacity (kremm/mana), spell power"
+            >
+              WIZ (Wizardry)
+            </div>
+            <input
+              type="number"
+              id="wiz-current"
+              class="attribute-input"
+              min="1"
+              max="999"
+            />
+            <input
+              type="number"
+              id="wiz-max"
+              class="attribute-input"
+              min="1"
+              max="999"
+            />
+            <span id="wiz-modifier" class="modifier">+0</span>
+
+            <div
+              class="attribute-name"
+              title="Charisma: Personal magnetism, leadership, attractiveness"
+            >
+              CHA (Charisma)
+            </div>
+            <input
+              type="number"
+              id="cha-current"
+              class="attribute-input"
+              min="1"
+              max="999"
+            />
+            <input
+              type="number"
+              id="cha-max"
+              class="attribute-input"
+              min="1"
+              max="999"
+            />
+            <span id="cha-modifier" class="modifier">+0</span>
+          </div>
+
+          <div class="attribute-summary">
+            <div class="adds">
+              <label title="Personal Adds from STR, DEX, SPD, and LK above 12"
+                >Total ADDS:</label
+              >
+              <span id="total-adds">0</span>
+            </div>
+            <div class="adds-explanation">
+              Personal Adds = (STR-12) + (DEX-12) + (SPD-12) + (LK-12), only for
+              values > 12
+            </div>
+          </div>
+        </section>
+
+        <section class="actions">
+          <div class="action-buttons">
+            <button
+              id="roll-attributes"
+              class="btn btn-primary"
+              title="Roll 3d6 for each attribute with TARO for triples"
+            >
+              Roll New Attributes
+            </button>
+            <button
+              id="reroll-attributes"
+              class="btn btn-secondary"
+              title="Reroll all attributes and apply kindred modifiers"
+            >
+              Reroll All
+            </button>
+            <button
+              id="export-character"
+              class="btn btn-success"
+              title="Save character to JSON file"
+            >
+              Export Character
+            </button>
+            <button
+              id="import-character"
+              class="btn btn-info"
+              title="Load character from JSON file"
+            >
+              Import Character
+            </button>
+          </div>
+        </section>
+
+        <section class="talents">
+          <h2>Talents</h2>
+          <div class="info-box">
+            <h4>Talent Rules</h4>
+            <ul>
+              <li>Characters start with <strong>1 talent</strong> (Rogues get <strong>2 talents</strong>)</li>
+              <li>Talents provide <strong>+3 bonus</strong> to specific saving rolls when the relevant attribute is <strong>10 or higher</strong></li>
+              <li>New talents cost <strong>300 Adventure Points</strong> or are gained when leveling up</li>
+              <li>Rogues get extra rogue-like talents (*) on <strong>even levels</strong></li>
+            </ul>
+          </div>
+          <div class="talents-container">
+            <div class="talent-input">
+              <select
+                id="new-talent"
+                title="Choose a talent that reflects your character's background and skills"
+              >
+                <option value="">Select a talent</option>
+              </select>
+              <button id="add-talent" class="btn btn-small">Add Talent</button>
+            </div>
+            <div id="talents-list" class="talents-list"></div>
+          </div>
+        </section>
+
+        <section class="equipment">
+          <h2>Equipment</h2>
+          <div class="equipment-grid">
+            <div class="equipment-section">
+              <h3>Weapons</h3>
+              <div class="equipment-input">
+                <input
+                  type="text"
+                  id="new-weapon"
+                  placeholder="Weapon name"
+                  title="Warriors get +1d6 per level with melee weapons"
+                />
+                <button id="add-weapon" class="btn btn-small">Add</button>
+              </div>
+              <div id="weapons-list" class="equipment-list"></div>
+            </div>
+
+            <div class="equipment-section">
+              <h3>Armor</h3>
+              <div class="equipment-input">
+                <input
+                  type="text"
+                  id="new-armor"
+                  placeholder="Armor name"
+                  title="Warriors can double armor protection at cost of durability"
+                />
+                <button id="add-armor" class="btn btn-small">Add</button>
+              </div>
+              <div id="armor-list" class="equipment-list"></div>
+            </div>
+
+            <div class="equipment-section">
+              <h3>Items</h3>
+              <div class="equipment-input">
+                <input type="text" id="new-item" placeholder="Item name" />
+                <button id="add-item" class="btn btn-small">Add</button>
+              </div>
+              <div id="items-list" class="equipment-list"></div>
+            </div>
+          </div>
+
+          <div class="money-section">
+            <h3>Money</h3>
+            <div class="money-input">
+              <label
+                for="gold"
+                title="Starting gold = 3d6 × 10 (or kindred specific)"
+                >Gold:</label
+              >
+              <input type="number" id="gold" min="0" value="0" />
+            </div>
+          </div>
+          
+          <div class="info-box">
+            <h4>Starting Equipment by Class</h4>
+            <ul>
+              <li><strong>Warriors:</strong> Sword, Shield, Leather Armor - Skilled fighters equipped for combat</li>
+              <li><strong>Rogues:</strong> Dagger, Lockpicks, Leather Armor - Versatile adventurers ready for stealth</li>
+              <li><strong>Wizards:</strong> Staff, Spellbook, Robes - Magic users with essential spell components</li>
+              <li><strong>Citizens:</strong> Club, Basic Clothing - Average folk with minimal equipment</li>
+              <li><strong>Specialists:</strong> Varies by specialization - Equipment depends on their unique abilities</li>
+              <li><strong>Starting Gold:</strong> 3d6 × 10 gold pieces - Rolled automatically with attributes</li>
+            </ul>
+            <p class="equipment-note">Additional equipment can be purchased with starting gold or acquired during adventures.</p>
+          </div>
+        </section>
+      </main>
+
+      <!-- Help Button -->
+      <button class="help-button" onclick="toggleHelp()" title="Show/Hide Help">
+        ?
+      </button>
+    </div>
+
+    <!-- Footer with Copyright -->
+    <footer class="copyright-footer">
+      <p>
+        Tunnels & Trolls™ and Deluxe Tunnels & Trolls™ are trademarks of Flying Buffalo Inc.
+      </p>
+      <p>
+        © 2015 Ken St Andre, Liz Danforth, Rick Loomis, Steven Crompton & Jim Peters. All rights reserved.
+      </p>
+      <p>
+        This character generator is an unofficial fan tool. Visit <a href="https://www.flyingbuffalo.com" target="_blank" rel="noopener">www.flyingbuffalo.com</a> for official T&T products.
+      </p>
+    </footer>
+
+    <script>
+      function toggleHelp() {
+        const helpSection = document.getElementById("help-section");
+        helpSection.style.display =
+          helpSection.style.display === "none" ? "block" : "none";
+      }
+    </script>
+    <script src="dice.js"></script>
+    <script src="character.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
