@@ -334,6 +334,11 @@ class Character {
         return Dice.calculateAdds(combatAttributes);
     }
     
+    calculateWeightPossible() {
+        // Weight Possible = STR × 10 pounds (or STR × 100 weight units)
+        return this.attributes.str.current * 10;
+    }
+    
     // Get specialist type based on which attribute(s) had triples
     getSpecialistType() {
         if (!this.hasTriples || this.specialistAttributes.length === 0) {

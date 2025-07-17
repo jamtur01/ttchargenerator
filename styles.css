@@ -322,6 +322,24 @@ h3 {
     font-weight: 900;
 }
 
+.weight-possible {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #654321;
+    font-family: 'Cinzel', serif;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-left: 40px;
+}
+
+.weight-possible span {
+    color: #d4af37;
+    font-size: 1.8rem;
+    margin-left: 15px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
+    font-weight: 900;
+}
+
 .action-buttons {
     display: flex;
     gap: 20px;

@@ -74,6 +74,7 @@ class TTCharacterGenerator {
             importCharacter: document.getElementById('import-character'),
             
             totalAdds: document.getElementById('total-adds'),
+            weightPossible: document.getElementById('weight-possible'),
             
             newTalent: document.getElementById('new-talent'),
             addTalent: document.getElementById('add-talent'),
@@ -489,6 +490,10 @@ class TTCharacterGenerator {
         // Update total combat adds (only STR, DEX, SPD, LK > 12)
         const adds = this.character.calculateTotalAdds();
         this.elements.totalAdds.textContent = adds >= 0 ? `+${adds}` : adds;
+        
+        // Update weight possible (STR × 10 pounds)
+        const weightPossible = this.character.calculateWeightPossible();
+        this.elements.weightPossible.textContent = weightPossible;
     }
     
     updateClassOptions() {

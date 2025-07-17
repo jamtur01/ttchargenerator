@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tunnels & Trolls Character Generator</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -161,8 +162,12 @@
                 title="Roll 3d6 on height/weight table or choose"
                 >Height:</label
               >
+              <input type="text" id="height" placeholder="e.g., 5'10&quot;" />
+            </div>
+            <div class="field">
+              <label for="weight" title="Weight in pounds">Weight:</label>
               <div class="input-group">
-                <input type="text" id="height" placeholder="e.g., 5'10&quot;" />
+                <input type="text" id="weight" placeholder="e.g., 165 lbs" />
                 <button
                   type="button"
                   id="roll-height-weight"
@@ -172,10 +177,6 @@
                   Generate
                 </button>
               </div>
-            </div>
-            <div class="field">
-              <label for="weight" title="Weight in pounds">Weight:</label>
-              <input type="text" id="weight" placeholder="e.g., 165 lbs" />
             </div>
             <div class="field">
               <label for="level" title="Character experience level"
@@ -400,6 +401,12 @@
               title="Personal Adds = (STR-12) + (DEX-12) + (SPD-12) + (LK-12), only for values > 12"
             >
               Total ADDS: <span id="total-adds">0</span>
+            </div>
+            <div
+              class="weight-possible"
+              title="Weight Possible = STR × 10 pounds (maximum carrying capacity)"
+            >
+              Weight Possible: <span id="weight-possible">0</span> lbs
             </div>
           </div>
         </section>
