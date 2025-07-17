@@ -1017,3 +1017,43 @@ select[disabled] {
     text-decoration: underline;
     text-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
 }
+
+/* Character Abilities Section */
+.abilities {
+    padding: 30px;
+    border-bottom: 2px solid rgba(139, 69, 19, 0.3);
+    position: relative;
+}
+
+#abilities-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+#abilities-list li {
+    position: relative;
+    padding-left: 25px;
+    margin-bottom: 12px;
+    line-height: 1.6;
+    color: #2c1810;
+}
+
+#abilities-list li::before {
+    content: '⚔';
+    position: absolute;
+    left: 0;
+    color: #d4af37;
+    font-size: 1.1rem;
+}
+
+#abilities-list li.no-abilities {
+    font-style: italic;
+    color: #8b7355;
+    opacity: 0.8;
+}
+
+#abilities-list li.no-abilities::before {
+    content: '○';
+    color: #8b7355;
+}

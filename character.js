@@ -94,7 +94,12 @@ class Character {
                 description: 'Skilled fighters with weapon/armor bonuses but no innate magical ability',
                 requirements: {},
                 equipment: ['Sword', 'Shield', 'Leather Armor'],
-                startingTalents: 1
+                startingTalents: 1,
+                abilities: [
+                    'Weapon Bonus: +1d6 per level with melee weapons',
+                    'Armor Bonus: Can double armor protection (with durability cost)',
+                    'No innate magical ability - cannot cast spells'
+                ]
             },
             rogue: {
                 name: 'Rogue',
@@ -102,7 +107,14 @@ class Character {
                 requirements: {},
                 equipment: ['Dagger', 'Lockpicks', 'Leather Armor'],
                 startingTalents: 2,
-                startingSpells: 1 // Rogues know one spell to start
+                startingSpells: 1, // Rogues know one spell to start
+                abilities: [
+                    'Starts with 2 talents (instead of 1)',
+                    'Gains additional rogue talents on even levels',
+                    'Can learn and cast spells (knows 1 to start)',
+                    'Full weapon effectiveness with all weapons',
+                    'At 7th level: Can specialize as warrior-rogue or wizard-rogue'
+                ]
             },
             wizard: {
                 name: 'Wizard',
@@ -110,14 +122,14 @@ class Character {
                 requirements: { iq: 10, dex: 10 },
                 equipment: ['Staff', 'Spellbook', 'Robes'],
                 startingTalents: 1,
-                knowsAllFirstLevelSpells: true
-            },
-            citizen: {
-                name: 'Citizen',
-                description: 'Average residents with no special training',
-                requirements: {},
-                equipment: ['Club', 'Basic Clothing'],
-                startingTalents: 1
+                knowsAllFirstLevelSpells: true,
+                abilities: [
+                    'Knows all 1st level spells',
+                    'Reduced spell cost: -1 WIZ per character level difference',
+                    'Focus affinity: Additional -1 WIZ per level when using staff/wand',
+                    'Limited to 2d6 weapons only',
+                    'No personal adds with weapons > 2d6'
+                ]
             },
             specialist: {
                 name: 'Specialist',
@@ -125,7 +137,12 @@ class Character {
                 requirements: {},
                 equipment: ['Varies by specialization'],
                 startingTalents: 1,
-                isSpecialist: true
+                isSpecialist: true,
+                abilities: [
+                    'Must roll triples (TARO) on at least one attribute',
+                    'Special ability based on which attribute(s) had triples',
+                    'Doubles saving roll totals for specialist attribute'
+                ]
             }
         };
         
@@ -278,11 +295,6 @@ class Character {
     
     canSelectClass(characterClass) {
         if (!this.classData[characterClass]) return false;
-        
-        // Special rule: Citizens cannot be selected if player rolled triples
-        if (characterClass === 'citizen' && this.hasTriples) {
-            return false;
-        }
         
         // Specialist can only be selected if player rolled triples
         if (characterClass === 'specialist' && !this.hasTriples) {
@@ -447,9 +459,7 @@ class Character {
         if (!this.characterClass) {
             errors.push('Character class is required');
         } else if (!this.canSelectClass(this.characterClass)) {
-            if (this.characterClass === 'citizen' && this.hasTriples) {
-                errors.push('Cannot select Citizen class when triples were rolled - must be a Specialist');
-            } else if (this.characterClass === 'specialist' && !this.hasTriples) {
+            if (this.characterClass === 'specialist' && !this.hasTriples) {
                 errors.push('Cannot select Specialist class without rolling triples');
             } else {
                 errors.push(`Cannot select ${this.characterClass} class`);
@@ -463,6 +473,34 @@ class Character {
         });
         
         return errors;
+    }
+    
+    // Get abilities based on class and kindred
+    getAbilities() {
+        const abilities = [];
+        
+        // Add class abilities
+        if (this.characterClass && this.classData[this.characterClass]) {
+            const classAbilities = this.classData[this.characterClass].abilities || [];
+            abilities.push(...classAbilities);
+            
+            // Add specialist-specific abilities
+            if (this.characterClass === 'specialist' && this.specialistAttributes.length > 0) {
+                const specialistType = this.getSpecialistType();
+                if (specialistType) {
+                    abilities.push(`Specialist Type: ${specialistType}`);
+                }
+            }
+        }
+        
+        // Add kindred abilities
+        if (this.kindred === 'human') {
+            abilities.push('Second Chance: Can reroll any non-fumbled saving roll once');
+        } else if (this.kindred === 'leprechaun') {
+            abilities.push('Wink-Wing: Natural teleportation up to 50 feet for 5 WIZ');
+        }
+        
+        return abilities;
     }
 }
 

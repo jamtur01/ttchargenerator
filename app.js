@@ -139,11 +139,13 @@ class TTCharacterGenerator {
             this.character.applyKindredModifiers();
             this.updateUI();
             this.updateRollHeightWeightButton();
+            this.updateAbilities();
         });
         
         this.elements.characterClass.addEventListener('change', (e) => {
             this.character.setClass(e.target.value);
             this.updateUI();
+            this.updateAbilities();
         });
         
         this.elements.gender.addEventListener('change', (e) => {
@@ -174,6 +176,7 @@ class TTCharacterGenerator {
             this.attributeElements[attr].current.addEventListener('input', (e) => {
                 this.character.attributes[attr].current = parseInt(e.target.value) || 0;
                 this.updateModifiers();
+                this.updateAbilities();
             });
             
             this.attributeElements[attr].max.addEventListener('input', (e) => {
@@ -466,6 +469,7 @@ class TTCharacterGenerator {
         this.updateEquipmentLists();
         this.updateSpecialistInfo();
         this.updateRollHeightWeightButton();
+        this.updateAbilities();
     }
     
     updateModifiers() {
@@ -653,6 +657,19 @@ class TTCharacterGenerator {
             return false;
         }
         return true;
+    }
+    
+    updateAbilities() {
+        const abilitiesList = document.getElementById('abilities-list');
+        if (!abilitiesList) return;
+        
+        const abilities = this.character.getAbilities();
+        
+        if (abilities.length === 0) {
+            abilitiesList.innerHTML = '<li class="no-abilities">Select a class and kindred to see abilities</li>';
+        } else {
+            abilitiesList.innerHTML = abilities.map(ability => `<li>${ability}</li>`).join('');
+        }
     }
 }
 
