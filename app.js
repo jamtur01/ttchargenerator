@@ -1,10 +1,59 @@
 class TTCharacterGenerator {
     constructor() {
         this.character = new Character();
+        this.initializeFantasyNameData();
+        this.initializeHeightWeightTable();
         this.initializeElements();
         this.populateTalentDropdown();
         this.bindEvents();
         this.updateUI();
+    }
+    
+    initializeFantasyNameData() {
+        this.fantasyNameParts = {
+            prefixes: [
+                'Ald', 'Bran', 'Cor', 'Dor', 'El', 'Fen', 'Gar', 'Hal', 'Jar', 'Kar',
+                'Lor', 'Mor', 'Nor', 'Or', 'Ral', 'Sar', 'Tar', 'Val', 'Wil', 'Zar',
+                'Ara', 'Bel', 'Cel', 'Del', 'Era', 'Fae', 'Gwen', 'Hel', 'Ira', 'Lir',
+                'Mir', 'Nym', 'Ori', 'Rhea', 'Syl', 'Tara', 'Una', 'Vel', 'Wyn', 'Zara'
+            ],
+            middles: [
+                'an', 'en', 'in', 'on', 'un', 'ar', 'er', 'or', 'ur', 'al',
+                'el', 'il', 'ol', 'ul', 'and', 'end', 'ind', 'ond', 'ath',
+                'eth', 'ith', 'oth', 'as', 'es', 'is', 'os', 'us', 'wyn'
+            ],
+            suffixes: [
+                'dor', 'grim', 'har', 'ion', 'las', 'mir', 'nar', 'ric', 'thor', 'var',
+                'wen', 'wyn', 'zar', 'dan', 'far', 'gar', 'kar', 'lan', 'mar', 'sar',
+                'ara', 'ella', 'ira', 'ora', 'una', 'anna', 'enna', 'inna', 'lyn', 'ryn'
+            ],
+            titles: [
+                'the Bold', 'the Brave', 'the Wise', 'the Swift', 'the Strong',
+                'of the North', 'of the Mountain', 'Stormborn', 'Ironfoot', 'Goldbeard',
+                'the Silent', 'the Wanderer', 'Dragonslayer', 'the Cunning', 'Lightbringer'
+            ]
+        };
+    }
+    
+    initializeHeightWeightTable() {
+        this.heightWeightTable = {
+            3:  { height: "4'4\"", weightMin: 60, weightMax: 75 },
+            4:  { height: "4'7\"", weightMin: 75, weightMax: 95 },
+            5:  { height: "4'10\"", weightMin: 95, weightMax: 115 },
+            6:  { height: "5'1\"", weightMin: 110, weightMax: 135 },
+            7:  { height: "5'3\"", weightMin: 125, weightMax: 150 },
+            8:  { height: "5'5\"", weightMin: 135, weightMax: 165 },
+            9:  { height: "5'7\"", weightMin: 150, weightMax: 175 },
+            10: { height: "5'8\"", weightMin: 155, weightMax: 185 },
+            11: { height: "5'9\"", weightMin: 160, weightMax: 190 },
+            12: { height: "5'10\"", weightMin: 165, weightMax: 195 },
+            13: { height: "6'0\"", weightMin: 180, weightMax: 210 },
+            14: { height: "6'2\"", weightMin: 190, weightMax: 230 },
+            15: { height: "6'4\"", weightMin: 200, weightMax: 240 },
+            16: { height: "6'7\"", weightMin: 220, weightMax: 265 },
+            17: { height: "6'10\"", weightMin: 240, weightMax: 280 },
+            18: { height: "7'1\"", weightMin: 255, weightMax: 300 }
+        };
     }
     
     initializeElements() {
@@ -41,7 +90,10 @@ class TTCharacterGenerator {
             addItem: document.getElementById('add-item'),
             itemsList: document.getElementById('items-list'),
             
-            gold: document.getElementById('gold')
+            gold: document.getElementById('gold'),
+            
+            generateName: document.getElementById('generate-name'),
+            rollHeightWeight: document.getElementById('roll-height-weight')
         };
         
         this.attributeElements = {};
@@ -86,6 +138,7 @@ class TTCharacterGenerator {
             this.character.kindred = e.target.value;
             this.character.applyKindredModifiers();
             this.updateUI();
+            this.updateRollHeightWeightButton();
         });
         
         this.elements.characterClass.addEventListener('change', (e) => {
@@ -183,6 +236,115 @@ class TTCharacterGenerator {
                 this.addEquipment('items', this.elements.newItem.value);
             }
         });
+        
+        // Bind generate name button
+        if (this.elements.generateName) {
+            this.elements.generateName.addEventListener('click', () => {
+                this.generateFantasyName();
+            });
+        }
+        
+        // Bind roll height/weight button
+        if (this.elements.rollHeightWeight) {
+            this.elements.rollHeightWeight.addEventListener('click', () => {
+                this.rollHeightWeight();
+            });
+        }
+    }
+    
+    generateFantasyName() {
+        const prefix = this.fantasyNameParts.prefixes[Math.floor(Math.random() * this.fantasyNameParts.prefixes.length)];
+        const middle = Math.random() > 0.5 ? this.fantasyNameParts.middles[Math.floor(Math.random() * this.fantasyNameParts.middles.length)] : '';
+        const suffix = this.fantasyNameParts.suffixes[Math.floor(Math.random() * this.fantasyNameParts.suffixes.length)];
+        
+        let name = prefix + middle + suffix;
+        
+        // 20% chance to add a title
+        if (Math.random() < 0.2) {
+            const title = this.fantasyNameParts.titles[Math.floor(Math.random() * this.fantasyNameParts.titles.length)];
+            name += ' ' + title;
+        }
+        
+        this.character.name = name;
+        this.elements.name.value = name;
+    }
+    
+    updateRollHeightWeightButton() {
+        if (this.elements.rollHeightWeight) {
+            const hasKindred = this.character.kindred && this.character.kindred !== '';
+            this.elements.rollHeightWeight.disabled = !hasKindred;
+            
+            if (!hasKindred) {
+                this.elements.rollHeightWeight.title = 'Select a kindred first to roll height and weight';
+            } else {
+                this.elements.rollHeightWeight.title = 'Roll 3d6 for height and weight';
+            }
+        }
+    }
+    
+    rollHeightWeight() {
+        // Roll 3d6
+        const rolls = Dice.rollMultiple(3, 6);
+        const total = rolls.reduce((sum, die) => sum + die, 0);
+        const result = this.heightWeightTable[total];
+        
+        if (!result) {
+            alert('Invalid roll result');
+            return;
+        }
+        
+        // Get kindred data for multipliers
+        const kindredData = this.character.kindredData[this.character.kindred] || this.character.kindredData.human;
+        
+        // Apply height multiplier
+        let height = result.height;
+        if (kindredData.heightMod && kindredData.heightMod !== 1) {
+            // Parse height and apply multiplier
+            const heightMatch = height.match(/(\d+)'(\d+)"/);
+            if (heightMatch) {
+                const feet = parseInt(heightMatch[1]);
+                const inches = parseInt(heightMatch[2]);
+                const totalInches = (feet * 12 + inches) * kindredData.heightMod;
+                const newFeet = Math.floor(totalInches / 12);
+                const newInches = Math.round(totalInches % 12);
+                height = `${newFeet}'${newInches}"`;
+            }
+        }
+        
+        // Apply weight multiplier
+        let weightMin = result.weightMin;
+        let weightMax = result.weightMax;
+        if (kindredData.weightMod && kindredData.weightMod !== 1) {
+            weightMin = Math.round(weightMin * kindredData.weightMod);
+            weightMax = Math.round(weightMax * kindredData.weightMod);
+        }
+        
+        // Choose a weight in the range (middle value)
+        const weight = Math.round(weightMin + (weightMax - weightMin) / 2);
+        
+        // Update fields
+        this.character.height = height;
+        this.character.weight = weight;
+        this.elements.height.value = height;
+        this.elements.weight.value = `${weight} lbs`;
+        
+        // Show roll result
+        let message = `Height/Weight Roll: ${rolls.join(' + ')} = ${total}\n\n`;
+        message += `Base Height: ${result.height}\n`;
+        
+        if (kindredData.heightMod && kindredData.heightMod !== 1) {
+            message += `Kindred Height Multiplier: ×${kindredData.heightMod}\n`;
+        }
+        message += `Final Height: ${height}\n\n`;
+        
+        message += `Base Weight Range: ${result.weightMin}-${result.weightMax} lbs\n`;
+        if (kindredData.weightMod && kindredData.weightMod !== 1) {
+            message += `Kindred Weight Multiplier: ×${kindredData.weightMod}\n`;
+            message += `Final Weight Range: ${weightMin}-${weightMax} lbs\n`;
+        }
+        message += `Set to: ${weight} lbs`;
+        
+        alert(message);
     }
     
     rollNewCharacter() {
@@ -303,6 +465,7 @@ class TTCharacterGenerator {
         this.updateTalentsList();
         this.updateEquipmentLists();
         this.updateSpecialistInfo();
+        this.updateRollHeightWeightButton();
     }
     
     updateModifiers() {
@@ -315,9 +478,6 @@ class TTCharacterGenerator {
         // Update total combat adds (only STR, DEX, SPD, LK > 12)
         const adds = this.character.calculateTotalAdds();
         this.elements.totalAdds.textContent = adds >= 0 ? `+${adds}` : adds;
-        
-        // Add tooltip to explain combat adds
-        this.elements.totalAdds.title = 'Personal Adds from STR, DEX, SPD, and LK above 12';
     }
     
     updateClassOptions() {

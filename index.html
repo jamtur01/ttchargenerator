@@ -4,15 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tunnels & Trolls Character Generator</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Cinzel:wght@600;900&family=Uncial+Antiqua&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=MedievalSharp&family=Cinzel:wght@600;900&family=Uncial+Antiqua&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <div class="container">
       <header>
-        <h1>Tunnels & Trolls<br>Character Generator</h1>
+        <h1>Tunnels & Trolls<br />Character Generator</h1>
         <p>Create your T&T character</p>
       </header>
 
@@ -44,11 +47,25 @@
 
         <section class="character-info">
           <h2>Character Information</h2>
-          <div class="info-grid">
-            <div class="field">
-              <label for="name">Name:</label>
-              <input type="text" id="name" placeholder="Enter character name" />
+          <div class="field name-field">
+            <label for="name">Name:</label>
+            <div class="input-group">
+              <input
+                type="text"
+                id="name"
+                placeholder="Enter character name"
+              />
+              <button
+                type="button"
+                id="generate-name"
+                class="btn btn-small"
+                title="Generate a random fantasy name"
+              >
+                Random
+              </button>
             </div>
+          </div>
+          <div class="info-grid">
             <div class="field">
               <label
                 for="kindred"
@@ -154,11 +171,21 @@
                 title="Roll 3d6 on height/weight table or choose"
                 >Height:</label
               >
-              <input type="text" id="height" placeholder="e.g., 5'10&quot;" />
+              <div class="input-group">
+                <input type="text" id="height" placeholder="e.g., 5'10&quot;" />
+                <button
+                  type="button"
+                  id="roll-height-weight"
+                  class="btn btn-small"
+                  title="Roll 3d6 for height and weight"
+                >
+                  Generate
+                </button>
+              </div>
             </div>
             <div class="field">
               <label for="weight" title="Weight in pounds">Weight:</label>
-              <input type="number" id="weight" min="1" max="999" />
+              <input type="text" id="weight" placeholder="e.g., 165 lbs" />
             </div>
             <div class="field">
               <label for="level" title="Character experience level"
@@ -355,7 +382,10 @@
           </div>
 
           <div class="attribute-summary">
-            <div class="adds" title="Personal Adds = (STR-12) + (DEX-12) + (SPD-12) + (LK-12), only for values > 12">
+            <div
+              class="adds"
+              title="Personal Adds = (STR-12) + (DEX-12) + (SPD-12) + (LK-12), only for values > 12"
+            >
               Total ADDS: <span id="total-adds">0</span>
             </div>
           </div>
@@ -399,10 +429,23 @@
           <div class="info-box">
             <h4>Talent Rules</h4>
             <ul>
-              <li>Characters start with <strong>1 talent</strong> (Rogues get <strong>2 talents</strong>)</li>
-              <li>Talents provide <strong>+3 bonus</strong> to specific saving rolls when the relevant attribute is <strong>10 or higher</strong></li>
-              <li>New talents cost <strong>300 Adventure Points</strong> or are gained when leveling up</li>
-              <li>Rogues get extra rogue-like talents (*) on <strong>even levels</strong></li>
+              <li>
+                Characters start with <strong>1 talent</strong> (Rogues get
+                <strong>2 talents</strong>)
+              </li>
+              <li>
+                Talents provide <strong>+3 bonus</strong> to specific saving
+                rolls when the relevant attribute is
+                <strong>10 or higher</strong>
+              </li>
+              <li>
+                New talents cost <strong>300 Adventure Points</strong> or are
+                gained when leveling up
+              </li>
+              <li>
+                Rogues get extra rogue-like talents (*) on
+                <strong>even levels</strong>
+              </li>
             </ul>
           </div>
           <div class="talents-container">
@@ -471,18 +514,39 @@
               <input type="number" id="gold" min="0" value="0" />
             </div>
           </div>
-          
+
           <div class="info-box">
             <h4>Starting Equipment by Class</h4>
             <ul>
-              <li><strong>Warriors:</strong> Sword, Shield, Leather Armor - Skilled fighters equipped for combat</li>
-              <li><strong>Rogues:</strong> Dagger, Lockpicks, Leather Armor - Versatile adventurers ready for stealth</li>
-              <li><strong>Wizards:</strong> Staff, Spellbook, Robes - Magic users with essential spell components</li>
-              <li><strong>Citizens:</strong> Club, Basic Clothing - Average folk with minimal equipment</li>
-              <li><strong>Specialists:</strong> Varies by specialization - Equipment depends on their unique abilities</li>
-              <li><strong>Starting Gold:</strong> 3d6 × 10 gold pieces - Rolled automatically with attributes</li>
+              <li>
+                <strong>Warriors:</strong> Sword, Shield, Leather Armor -
+                Skilled fighters equipped for combat
+              </li>
+              <li>
+                <strong>Rogues:</strong> Dagger, Lockpicks, Leather Armor -
+                Versatile adventurers ready for stealth
+              </li>
+              <li>
+                <strong>Wizards:</strong> Staff, Spellbook, Robes - Magic users
+                with essential spell components
+              </li>
+              <li>
+                <strong>Citizens:</strong> Club, Basic Clothing - Average folk
+                with minimal equipment
+              </li>
+              <li>
+                <strong>Specialists:</strong> Varies by specialization -
+                Equipment depends on their unique abilities
+              </li>
+              <li>
+                <strong>Starting Gold:</strong> 3d6 × 10 gold pieces - Rolled
+                automatically with attributes
+              </li>
             </ul>
-            <p class="equipment-note">Additional equipment can be purchased with starting gold or acquired during adventures.</p>
+            <p class="equipment-note">
+              Additional equipment can be purchased with starting gold or
+              acquired during adventures.
+            </p>
           </div>
         </section>
       </main>
@@ -496,13 +560,19 @@
     <!-- Footer with Copyright -->
     <footer class="copyright-footer">
       <p>
-        Tunnels & Trolls™ and Deluxe Tunnels & Trolls™ are trademarks of Flying Buffalo Inc.
+        Tunnels & Trolls™ and Deluxe Tunnels & Trolls™ are trademarks of Flying
+        Buffalo Inc.
       </p>
       <p>
-        © 2015 Ken St Andre, Liz Danforth, Rick Loomis, Steven Crompton & Jim Peters. All rights reserved.
+        © 2015 Ken St Andre, Liz Danforth, Rick Loomis, Steven Crompton & Jim
+        Peters. All rights reserved.
       </p>
       <p>
-        This character generator is an unofficial fan tool. Visit <a href="https://www.flyingbuffalo.com" target="_blank" rel="noopener">www.flyingbuffalo.com</a> for official T&T products.
+        This character generator is an unofficial fan tool. Visit
+        <a href="https://www.flyingbuffalo.com" target="_blank" rel="noopener"
+          >www.flyingbuffalo.com</a
+        >
+        for official T&T products.
       </p>
     </footer>
 
