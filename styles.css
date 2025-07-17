@@ -694,6 +694,61 @@ h3 {
     cursor: help;
 }
 
+[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #2c1810;
+    color: #f4e4bc;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #8b4513;
+    font-size: 0.85rem;
+    font-family: 'MedievalSharp', serif;
+    white-space: nowrap;
+    max-width: 300px;
+    white-space: normal;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    z-index: 1000;
+    pointer-events: none;
+    margin-bottom: 8px;
+}
+
+[title]:hover::before {
+    content: '';
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: #2c1810;
+    margin-bottom: -4px;
+    z-index: 1001;
+    pointer-events: none;
+}
+
+/* Special tooltip positioning for inputs and selects */
+input[title]:hover::after,
+select[title]:hover::after {
+    bottom: auto;
+    top: 100%;
+    margin-top: 8px;
+    margin-bottom: 0;
+}
+
+input[title]:hover::before,
+select[title]:hover::before {
+    bottom: auto;
+    top: 100%;
+    border-top-color: transparent;
+    border-bottom-color: #2c1810;
+    margin-top: -4px;
+    margin-bottom: 0;
+}
+
 select[disabled] {
     cursor: not-allowed;
     opacity: 0.6;
