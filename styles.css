@@ -329,6 +329,17 @@ h3 {
     flex-wrap: wrap;
 }
 
+/* File Actions */
+.file-actions {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid #d4af37;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
 .btn {
     padding: 14px 28px;
     border: 2px solid #8b4513;

@@ -70,6 +70,7 @@ class TTCharacterGenerator {
             rollAttributes: document.getElementById('roll-attributes'),
             rerollAttributes: document.getElementById('reroll-attributes'),
             exportCharacter: document.getElementById('export-character'),
+            exportPdf: document.getElementById('export-pdf'),
             importCharacter: document.getElementById('import-character'),
             
             totalAdds: document.getElementById('total-adds'),
@@ -195,6 +196,12 @@ class TTCharacterGenerator {
         this.elements.exportCharacter.addEventListener('click', () => {
             this.exportCharacter();
         });
+        
+        if (this.elements.exportPdf) {
+            this.elements.exportPdf.addEventListener('click', () => {
+                this.exportPDF();
+            });
+        }
         
         this.elements.importCharacter.addEventListener('click', () => {
             this.importCharacter();
@@ -648,6 +655,259 @@ class TTCharacterGenerator {
         };
         
         input.click();
+    }
+    
+    exportPDF() {
+        // Create a new window with the character sheet formatted for printing
+        const printWindow = window.open('', '_blank');
+        const character = this.character;
+        const kindredName = character.kindredData[character.kindred]?.name || 'Unknown';
+        const className = character.classData[character.characterClass]?.name || 'Unknown';
+        
+        // Get abilities
+        const abilities = character.getAbilities();
+        const abilitiesHTML = abilities.length > 0
+            ? abilities.map(ability => `<li>${ability}</li>`).join('')
+            : '<li>No special abilities</li>';
+        
+        // Get equipment lists
+        const weaponsHTML = character.equipment.weapons.length > 0
+            ? character.equipment.weapons.map(w => `<li>${w}</li>`).join('')
+            : '<li>None</li>';
+            
+        const armorHTML = character.equipment.armor.length > 0
+            ? character.equipment.armor.map(a => `<li>${a}</li>`).join('')
+            : '<li>None</li>';
+            
+        const itemsHTML = character.equipment.items.length > 0
+            ? character.equipment.items.map(i => `<li>${i}</li>`).join('')
+            : '<li>None</li>';
+            
+        const talentsHTML = character.talents.length > 0
+            ? character.talents.map(t => `<li>${t}</li>`).join('')
+            : '<li>None</li>';
+        
+        const html = `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>${character.name || 'Character'} - T&T Character Sheet</title>
+    <style>
+        @page {
+            size: letter;
+            margin: 0.5in;
+        }
+        @media print {
+            body { margin: 0; }
+        }
+        body {
+            font-family: 'Georgia', serif;
+            line-height: 1.4;
+            color: #2c1810;
+            margin: 20px;
+        }
+        h1, h2, h3 {
+            font-family: 'Times New Roman', serif;
+            text-transform: uppercase;
+            margin: 10px 0;
+        }
+        h1 {
+            text-align: center;
+            font-size: 24px;
+            border-bottom: 3px double #2c1810;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        h2 {
+            font-size: 18px;
+            border-bottom: 2px solid #2c1810;
+            margin-top: 20px;
+        }
+        .header-info {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .info-group {
+            display: flex;
+            align-items: baseline;
+            gap: 5px;
+        }
+        .label {
+            font-weight: bold;
+        }
+        .attributes-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        .attributes-table th,
+        .attributes-table td {
+            border: 1px solid #2c1810;
+            padding: 5px 10px;
+            text-align: center;
+        }
+        .attributes-table th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+        .combat-adds {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 15px 0;
+            padding: 10px;
+            border: 2px solid #2c1810;
+        }
+        ul {
+            margin: 5px 0;
+            padding-left: 25px;
+        }
+        .equipment-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #2c1810;
+            font-size: 12px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tunnels & Trolls Character Sheet</h1>
+    
+    <div class="header-info">
+        <div class="info-group">
+            <span class="label">Name:</span>
+            <span>${character.name || 'Unnamed'}</span>
+        </div>
+        <div class="info-group">
+            <span class="label">Class:</span>
+            <span>${className}</span>
+        </div>
+        <div class="info-group">
+            <span class="label">Level:</span>
+            <span>${character.level}</span>
+        </div>
+        <div class="info-group">
+            <span class="label">Kindred:</span>
+            <span>${kindredName}</span>
+        </div>
+        <div class="info-group">
+            <span class="label">Gender:</span>
+            <span>${character.gender || 'Not specified'}</span>
+        </div>
+        <div class="info-group">
+            <span class="label">Age:</span>
+            <span>${character.age || 'Not specified'}</span>
+        </div>
+        <div class="info-group">
+            <span class="label">Height:</span>
+            <span>${character.height || 'Not specified'}</span>
+        </div>
+        <div class="info-group">
+            <span class="label">Weight:</span>
+            <span>${character.weight || 'Not specified'}</span>
+        </div>
+        <div class="info-group">
+            <span class="label">Gold:</span>
+            <span>${character.gold} gp</span>
+        </div>
+    </div>
+    
+    <h2>Attributes</h2>
+    <table class="attributes-table">
+        <tr>
+            <th>Attribute</th>
+            <th>Current</th>
+            <th>Max</th>
+        </tr>
+        <tr>
+            <td><strong>STR</strong> (Strength)</td>
+            <td>${character.attributes.str.current}</td>
+            <td>${character.attributes.str.max}</td>
+        </tr>
+        <tr>
+            <td><strong>CON</strong> (Constitution)</td>
+            <td>${character.attributes.con.current}</td>
+            <td>${character.attributes.con.max}</td>
+        </tr>
+        <tr>
+            <td><strong>DEX</strong> (Dexterity)</td>
+            <td>${character.attributes.dex.current}</td>
+            <td>${character.attributes.dex.max}</td>
+        </tr>
+        <tr>
+            <td><strong>SPD</strong> (Speed)</td>
+            <td>${character.attributes.spd.current}</td>
+            <td>${character.attributes.spd.max}</td>
+        </tr>
+        <tr>
+            <td><strong>LK</strong> (Luck)</td>
+            <td>${character.attributes.lk.current}</td>
+            <td>${character.attributes.lk.max}</td>
+        </tr>
+        <tr>
+            <td><strong>IQ</strong> (Intelligence)</td>
+            <td>${character.attributes.iq.current}</td>
+            <td>${character.attributes.iq.max}</td>
+        </tr>
+        <tr>
+            <td><strong>WIZ</strong> (Wizardry)</td>
+            <td>${character.attributes.wiz.current}</td>
+            <td>${character.attributes.wiz.max}</td>
+        </tr>
+        <tr>
+            <td><strong>CHA</strong> (Charisma)</td>
+            <td>${character.attributes.cha.current}</td>
+            <td>${character.attributes.cha.max}</td>
+        </tr>
+    </table>
+    
+    <div class="combat-adds">
+        Personal Adds: ${character.calculateTotalAdds() >= 0 ? '+' : ''}${character.calculateTotalAdds()}
+    </div>
+    
+    <h2>Character Abilities</h2>
+    <ul>${abilitiesHTML}</ul>
+    
+    <h2>Talents</h2>
+    <ul>${talentsHTML}</ul>
+    
+    <h2>Equipment</h2>
+    <div class="equipment-grid">
+        <div>
+            <h3>Weapons</h3>
+            <ul>${weaponsHTML}</ul>
+        </div>
+        <div>
+            <h3>Armor</h3>
+            <ul>${armorHTML}</ul>
+        </div>
+    </div>
+    <h3>Other Items</h3>
+    <ul>${itemsHTML}</ul>
+    
+    <div class="footer">
+        <p>Tunnels & Trolls™ is a trademark of Flying Buffalo Inc.</p>
+        <p>Character generated on ${new Date().toLocaleDateString()}</p>
+    </div>
+    
+    <script>
+        window.print();
+        setTimeout(() => window.close(), 1000);
+    </script>
+</body>
+</html>
+        `;
+        
+        printWindow.document.write(html);
+        printWindow.document.close();
     }
     
     validateAndShowErrors() {
