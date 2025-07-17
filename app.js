@@ -288,16 +288,65 @@ class TTCharacterGenerator {
     }
     
     generateRandomTalent() {
-        // Check if we need to replace existing talent(s) at level 1
         const isLevel1 = this.character.level === 1;
         const isRogue = this.character.characterClass === 'rogue';
         const isEvenLevel = this.character.level % 2 === 0;
         
-        // At level 1: non-rogues get 1 talent, rogues get 2 talents
-        const maxTalentsAtLevel1 = isRogue ? 2 : 1;
+        // Special handling for level 1 rogues
+        if (isLevel1 && isRogue) {
+            // Rogues at level 1 should always have exactly 2 talents
+            // If they have 0 or 2 talents, replace with 2 new talents
+            if (this.character.talents.length === 0 || this.character.talents.length === 2) {
+                // Clear all existing talents
+                while (this.character.talents.length > 0) {
+                    this.character.removeTalent(this.character.talents[0]);
+                }
+                
+                // Determine talent pool
+                let availableTalents = isEvenLevel ? [...this.character.rogueTalents] : [...this.character.talentsList];
+                
+                // Select 2 random talents
+                const selectedTalents = [];
+                for (let i = 0; i < 2 && availableTalents.length > 0; i++) {
+                    const randomIndex = Math.floor(Math.random() * availableTalents.length);
+                    const randomTalent = availableTalents[randomIndex];
+                    selectedTalents.push(randomTalent);
+                    // Remove selected talent from available pool to avoid duplicates
+                    availableTalents.splice(randomIndex, 1);
+                }
+                
+                // Add the selected talents
+                selectedTalents.forEach(talent => this.character.addTalent(talent));
+                this.updateTalentsList();
+                
+                // Clear the dropdown
+                setTimeout(() => {
+                    this.elements.newTalent.value = '';
+                }, 1000);
+                
+                return;
+            } else if (this.character.talents.length === 1) {
+                // If rogue has only 1 talent, add a second one
+                let availableTalents = isEvenLevel ? [...this.character.rogueTalents] : [...this.character.talentsList];
+                availableTalents = availableTalents.filter(talent => !this.character.talents.includes(talent));
+                
+                if (availableTalents.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * availableTalents.length);
+                    const randomTalent = availableTalents[randomIndex];
+                    this.character.addTalent(randomTalent);
+                    this.updateTalentsList();
+                    
+                    setTimeout(() => {
+                        this.elements.newTalent.value = '';
+                    }, 1000);
+                }
+                return;
+            }
+        }
         
-        // If at level 1 and already at max talents, we need to replace
-        const shouldReplace = isLevel1 && this.character.talents.length >= maxTalentsAtLevel1;
+        // Regular handling for non-rogues at level 1 or any character above level 1
+        const maxTalentsAtLevel1 = isRogue ? 2 : 1;
+        const shouldReplace = isLevel1 && !isRogue && this.character.talents.length >= maxTalentsAtLevel1;
         
         // Determine which talent pool to use
         let availableTalents = [];
@@ -336,9 +385,8 @@ class TTCharacterGenerator {
         
         // If we should replace, remove an existing talent first
         if (shouldReplace) {
-            // For level 1 characters, remove a random existing talent
-            const talentToRemove = this.character.talents[Math.floor(Math.random() * this.character.talents.length)];
-            this.character.removeTalent(talentToRemove);
+            // For level 1 non-rogues, remove the existing talent
+            this.character.talents = [];
         }
         
         // Add the new talent
@@ -357,9 +405,6 @@ class TTCharacterGenerator {
             setTimeout(() => {
                 this.elements.newTalent.value = '';
             }, 1000);
-            
-            // Optional: Show alert or just let the UI update speak for itself
-            // alert(message);
         }
     }
     
