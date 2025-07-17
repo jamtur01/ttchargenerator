@@ -149,6 +149,7 @@ class TTCharacterGenerator {
             this.character.setClass(e.target.value);
             this.updateUI();
             this.updateAbilities();
+            this.updateTalentsList(); // Update talents list after class change
         });
         
         this.elements.gender.addEventListener('change', (e) => {
@@ -169,6 +170,9 @@ class TTCharacterGenerator {
         
         this.elements.level.addEventListener('input', (e) => {
             this.character.level = parseInt(e.target.value) || 1;
+            // Adjust talents if needed when level changes
+            this.character.adjustTalentsForClassChange();
+            this.updateTalentsList();
         });
         
         this.elements.gold.addEventListener('input', (e) => {
@@ -288,123 +292,108 @@ class TTCharacterGenerator {
     }
     
     generateRandomTalent() {
-        const isLevel1 = this.character.level === 1;
         const isRogue = this.character.characterClass === 'rogue';
         const isEvenLevel = this.character.level % 2 === 0;
         
-        // Special handling for level 1 rogues
-        if (isLevel1 && isRogue) {
-            // Rogues at level 1 should always have exactly 2 talents
-            // If they have 0 or 2 talents, replace with 2 new talents
-            if (this.character.talents.length === 0 || this.character.talents.length === 2) {
-                // Clear all existing talents
-                while (this.character.talents.length > 0) {
-                    this.character.removeTalent(this.character.talents[0]);
+        // Get the maximum allowed talents for this character
+        const maxTalents = this.character.getMaxTalents();
+        const currentTalentCount = this.character.talents.length;
+        
+        // Check if at maximum talents
+        if (currentTalentCount >= maxTalents) {
+            // At max talents - need to replace one
+            // Determine which talent pool to use
+            let availableTalents = [];
+            
+            if (isRogue && isEvenLevel) {
+                // Rogues on even levels can only choose from rogue-like talents
+                availableTalents = [...this.character.rogueTalents];
+            } else if (isRogue) {
+                // Rogues on odd levels can choose from all talents
+                availableTalents = [...this.character.talentsList];
+            } else {
+                // Non-rogues can choose from all talents EXCEPT rogue talents
+                availableTalents = this.character.talentsList.filter(talent =>
+                    !this.character.rogueTalents.includes(talent)
+                );
+            }
+            
+            // Check if there are any available talents
+            if (availableTalents.length === 0) {
+                let message = 'No available talents to replace with.';
+                if (isRogue && isEvenLevel) {
+                    message = 'No available rogue-like talents. Rogues can only select rogue-like talents (marked with *) on even levels.';
                 }
-                
-                // Determine talent pool
-                let availableTalents = isEvenLevel ? [...this.character.rogueTalents] : [...this.character.talentsList];
-                
-                // Select 2 random talents
-                const selectedTalents = [];
-                for (let i = 0; i < 2 && availableTalents.length > 0; i++) {
-                    const randomIndex = Math.floor(Math.random() * availableTalents.length);
-                    const randomTalent = availableTalents[randomIndex];
-                    selectedTalents.push(randomTalent);
-                    // Remove selected talent from available pool to avoid duplicates
-                    availableTalents.splice(randomIndex, 1);
-                }
-                
-                // Add the selected talents
-                selectedTalents.forEach(talent => this.character.addTalent(talent));
+                alert(message);
+                return;
+            }
+            
+            // Select a random talent
+            const randomIndex = Math.floor(Math.random() * availableTalents.length);
+            const randomTalent = availableTalents[randomIndex];
+            
+            // Remove a random existing talent
+            const talentToRemove = this.character.talents[Math.floor(Math.random() * this.character.talents.length)];
+            this.character.removeTalent(talentToRemove);
+            
+            // Add the new talent
+            if (this.character.addTalent(randomTalent)) {
+                this.elements.newTalent.value = randomTalent;
                 this.updateTalentsList();
                 
-                // Clear the dropdown
+                // Silently replace without alert
                 setTimeout(() => {
                     this.elements.newTalent.value = '';
                 }, 1000);
-                
-                return;
-            } else if (this.character.talents.length === 1) {
-                // If rogue has only 1 talent, add a second one
-                let availableTalents = isEvenLevel ? [...this.character.rogueTalents] : [...this.character.talentsList];
-                availableTalents = availableTalents.filter(talent => !this.character.talents.includes(talent));
-                
-                if (availableTalents.length > 0) {
-                    const randomIndex = Math.floor(Math.random() * availableTalents.length);
-                    const randomTalent = availableTalents[randomIndex];
-                    this.character.addTalent(randomTalent);
-                    this.updateTalentsList();
-                    
-                    setTimeout(() => {
-                        this.elements.newTalent.value = '';
-                    }, 1000);
-                }
-                return;
             }
-        }
-        
-        // Regular handling for non-rogues at level 1 or any character above level 1
-        const maxTalentsAtLevel1 = isRogue ? 2 : 1;
-        const shouldReplace = isLevel1 && !isRogue && this.character.talents.length >= maxTalentsAtLevel1;
-        
-        // Determine which talent pool to use
-        let availableTalents = [];
-        
-        if (isRogue && isEvenLevel) {
-            // Rogues on even levels can only choose from rogue-like talents
-            availableTalents = [...this.character.rogueTalents];
-        } else if (isRogue) {
-            // Rogues on odd levels can choose from all talents
-            availableTalents = [...this.character.talentsList];
         } else {
-            // Non-rogues (or no class selected) can choose from all talents EXCEPT rogue talents
-            availableTalents = this.character.talentsList.filter(talent =>
-                !this.character.rogueTalents.includes(talent)
-            );
-        }
-        
-        // If not replacing, filter out talents the character already has
-        if (!shouldReplace) {
-            availableTalents = availableTalents.filter(talent => !this.character.talents.includes(talent));
-        }
-        
-        // Check if there are any available talents
-        if (availableTalents.length === 0) {
-            let message = 'No available talents to add.';
+            // Below max talents - can add new talent
+            let availableTalents = [];
+            
             if (isRogue && isEvenLevel) {
-                message = 'No available rogue-like talents to add. Rogues can only select rogue-like talents (marked with *) on even levels.';
-            }
-            alert(message);
-            return;
-        }
-        
-        // Select a random talent
-        const randomIndex = Math.floor(Math.random() * availableTalents.length);
-        const randomTalent = availableTalents[randomIndex];
-        
-        // If we should replace, remove an existing talent first
-        if (shouldReplace) {
-            // For level 1 non-rogues, remove the existing talent
-            this.character.talents = [];
-        }
-        
-        // Add the new talent
-        if (this.character.addTalent(randomTalent)) {
-            // Update the dropdown to show the selected talent
-            this.elements.newTalent.value = randomTalent;
-            this.updateTalentsList();
-            
-            // Show which talent was added
-            let message = shouldReplace ? `Replaced talent with: ${randomTalent}` : `Added talent: ${randomTalent}`;
-            if (this.character.rogueTalents.includes(randomTalent)) {
-                message += ' (Rogue-like talent)';
+                // Rogues on even levels can only choose from rogue-like talents
+                availableTalents = [...this.character.rogueTalents];
+            } else if (isRogue) {
+                // Rogues on odd levels can choose from all talents
+                availableTalents = [...this.character.talentsList];
+            } else {
+                // Non-rogues can choose from all talents EXCEPT rogue talents
+                availableTalents = this.character.talentsList.filter(talent =>
+                    !this.character.rogueTalents.includes(talent)
+                );
             }
             
-            // Clear the dropdown after a short delay
-            setTimeout(() => {
-                this.elements.newTalent.value = '';
-            }, 1000);
+            // Filter out talents the character already has
+            availableTalents = availableTalents.filter(talent => !this.character.talents.includes(talent));
+            
+            // Check if there are any available talents
+            if (availableTalents.length === 0) {
+                let message = 'No available talents to add.';
+                if (isRogue && isEvenLevel) {
+                    message = 'No available rogue-like talents to add. Rogues can only select rogue-like talents (marked with *) on even levels.';
+                }
+                alert(message);
+                return;
+            }
+            
+            // Select a random talent
+            const randomIndex = Math.floor(Math.random() * availableTalents.length);
+            const randomTalent = availableTalents[randomIndex];
+            
+            // Add the new talent
+            if (this.character.addTalent(randomTalent)) {
+                this.elements.newTalent.value = randomTalent;
+                this.updateTalentsList();
+                
+                let message = `Added talent: ${randomTalent}`;
+                if (this.character.rogueTalents.includes(randomTalent)) {
+                    message += ' (Rogue-like talent)';
+                }
+                
+                setTimeout(() => {
+                    this.elements.newTalent.value = '';
+                }, 1000);
+            }
         }
     }
     
@@ -762,6 +751,14 @@ class TTCharacterGenerator {
     
     addTalent() {
         const talentName = this.elements.newTalent.value.trim();
+        
+        // Check if at max talents
+        const maxTalents = this.character.getMaxTalents();
+        if (this.character.talents.length >= maxTalents) {
+            alert(`Cannot add more talents. Maximum allowed: ${maxTalents} (based on level ${this.character.level} as ${this.character.characterClass || 'no class'})`);
+            return;
+        }
+        
         if (this.character.addTalent(talentName)) {
             this.elements.newTalent.value = '';
             this.updateTalentsList();

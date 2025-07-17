@@ -277,6 +277,7 @@ class Character {
     }
     
     setClass(characterClass) {
+        const previousClass = this.characterClass;
         this.characterClass = characterClass;
         
         if (this.classData[characterClass]) {
@@ -319,6 +320,53 @@ class Character {
                     }
                 }
             });
+            
+            // Handle talent adjustments when changing from rogue
+            if (previousClass === 'rogue' && characterClass !== 'rogue') {
+                this.adjustTalentsForClassChange();
+            }
+        }
+    }
+    
+    // Calculate maximum allowed talents based on level and class
+    getMaxTalents() {
+        const level = this.level || 1;
+        
+        if (this.characterClass === 'rogue') {
+            // Rogues get: starting 2 + (level-1) normal + floor(level/2) rogue bonuses
+            // Level 1: 2
+            // Level 2: 2 + 1 + 1 = 4
+            // Level 3: 2 + 2 + 1 = 5
+            // Level 4: 2 + 3 + 2 = 7
+            return 1 + level + Math.floor(level / 2);
+        } else {
+            // Non-rogues get 1 talent per level
+            return level;
+        }
+    }
+    
+    // Adjust talents when changing from rogue to another class
+    adjustTalentsForClassChange() {
+        const maxTalents = this.getMaxTalents();
+        
+        // If character has more talents than allowed, remove excess
+        while (this.talents.length > maxTalents) {
+            // Remove rogue talents first, then others
+            let removed = false;
+            
+            // Try to remove a rogue talent first
+            for (let i = this.talents.length - 1; i >= 0; i--) {
+                if (this.rogueTalents.includes(this.talents[i])) {
+                    this.talents.splice(i, 1);
+                    removed = true;
+                    break;
+                }
+            }
+            
+            // If no rogue talent to remove, remove the last talent
+            if (!removed && this.talents.length > 0) {
+                this.talents.pop();
+            }
         }
     }
     
@@ -390,11 +438,18 @@ class Character {
     }
     
     addTalent(talentName) {
-        if (talentName && !this.talents.includes(talentName)) {
-            this.talents.push(talentName);
-            return true;
+        if (!talentName || this.talents.includes(talentName)) {
+            return false;
         }
-        return false;
+        
+        // Check if adding would exceed max talents
+        const maxTalents = this.getMaxTalents();
+        if (this.talents.length >= maxTalents) {
+            return false;
+        }
+        
+        this.talents.push(talentName);
+        return true;
     }
     
     removeTalent(talentName) {
