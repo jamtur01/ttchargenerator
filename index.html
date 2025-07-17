@@ -487,12 +487,16 @@
             <div class="equipment-section">
               <h3>Weapons</h3>
               <div class="equipment-input">
-                <input
-                  type="text"
-                  id="new-weapon"
-                  placeholder="Weapon name"
-                  title="Warriors get +1d6 per level with melee weapons"
-                />
+                <div class="typeahead-container">
+                  <input
+                    type="text"
+                    id="new-weapon"
+                    placeholder="Weapon name"
+                    title="Warriors get +1d6 per level with melee weapons"
+                    autocomplete="off"
+                  />
+                  <div id="weapon-typeahead" class="typeahead-dropdown"></div>
+                </div>
                 <button id="add-weapon" class="btn btn-small">Add</button>
               </div>
               <div id="weapons-list" class="equipment-list"></div>
@@ -501,12 +505,16 @@
             <div class="equipment-section">
               <h3>Armor</h3>
               <div class="equipment-input">
-                <input
-                  type="text"
-                  id="new-armor"
-                  placeholder="Armor name"
-                  title="Warriors can double armor protection at cost of durability"
-                />
+                <div class="typeahead-container">
+                  <input
+                    type="text"
+                    id="new-armor"
+                    placeholder="Armor name"
+                    title="Warriors can double armor protection at cost of durability"
+                    autocomplete="off"
+                  />
+                  <div id="armor-typeahead" class="typeahead-dropdown"></div>
+                </div>
                 <button id="add-armor" class="btn btn-small">Add</button>
               </div>
               <div id="armor-list" class="equipment-list"></div>
@@ -515,7 +523,7 @@
             <div class="equipment-section">
               <h3>Items</h3>
               <div class="equipment-input">
-                <input type="text" id="new-item" placeholder="Item name" />
+                <input type="text" id="new-item" placeholder="Item name" autocomplete="off" />
                 <button id="add-item" class="btn btn-small">Add</button>
               </div>
               <div id="items-list" class="equipment-list"></div>

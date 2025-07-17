@@ -1106,3 +1106,76 @@ select[disabled] {
     content: '○';
     color: #8b7355;
 }
+
+/* Typeahead Dropdown Styles */
+.typeahead-container {
+    position: relative;
+    flex: 1;
+}
+
+.typeahead-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #f4e4bc;
+    border: 2px solid #8b4513;
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    display: none;
+}
+
+.typeahead-dropdown.show {
+    display: block;
+}
+
+.typeahead-item {
+    padding: 12px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(139, 69, 19, 0.2);
+    transition: background-color 0.2s;
+}
+
+.typeahead-item:last-child {
+    border-bottom: none;
+}
+
+.typeahead-item:hover,
+.typeahead-item.active {
+    background: rgba(212, 175, 55, 0.2);
+}
+
+.typeahead-item-name {
+    font-weight: 600;
+    color: #654321;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.typeahead-item-details {
+    font-size: 0.85em;
+    color: #8b7355;
+    line-height: 1.4;
+}
+
+.typeahead-item-attribute {
+    display: inline-block;
+    margin-right: 10px;
+}
+
+/* No results message */
+.typeahead-no-results {
+    padding: 12px;
+    text-align: center;
+    color: #8b7355;
+    font-style: italic;
+}
+
+/* Adjust equipment input styling when in typeahead container */
+.typeahead-container input {
+    width: 100%;
+}

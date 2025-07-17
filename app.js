@@ -137,6 +137,10 @@ class TTCharacterGenerator {
             this.character.name = e.target.value;
         });
         
+        // Bind typeahead events for weapons and armor
+        this.initializeTypeahead('weapon', this.elements.newWeapon, 'weapon-typeahead', EquipmentData.weapons);
+        this.initializeTypeahead('armor', this.elements.newArmor, 'armor-typeahead', EquipmentData.armor);
+        
         this.elements.kindred.addEventListener('change', (e) => {
             this.character.kindred = e.target.value;
             this.character.applyKindredModifiers();
@@ -1133,6 +1137,148 @@ class TTCharacterGenerator {
             return false;
         }
         return true;
+    }
+    
+    initializeTypeahead(type, inputElement, dropdownId, dataSource) {
+        const dropdown = document.getElementById(dropdownId);
+        let currentIndex = -1;
+        let filteredItems = [];
+        
+        // Focus and input events
+        inputElement.addEventListener('focus', () => {
+            if (inputElement.value.trim()) {
+                this.updateTypeaheadDropdown(inputElement.value, dropdown, dataSource);
+            }
+        });
+        
+        inputElement.addEventListener('input', (e) => {
+            currentIndex = -1;
+            this.updateTypeaheadDropdown(e.target.value, dropdown, dataSource);
+        });
+        
+        // Keyboard navigation
+        inputElement.addEventListener('keydown', (e) => {
+            if (!dropdown.classList.contains('show')) return;
+            
+            const items = dropdown.querySelectorAll('.typeahead-item');
+            
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                currentIndex = Math.min(currentIndex + 1, items.length - 1);
+                this.highlightTypeaheadItem(items, currentIndex);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                currentIndex = Math.max(currentIndex - 1, -1);
+                this.highlightTypeaheadItem(items, currentIndex);
+            } else if (e.key === 'Enter' && currentIndex >= 0) {
+                e.preventDefault();
+                const selectedItem = items[currentIndex];
+                if (selectedItem) {
+                    const itemName = selectedItem.dataset.itemName;
+                    inputElement.value = itemName;
+                    dropdown.classList.remove('show');
+                    
+                    // Trigger add button click
+                    if (type === 'weapon') {
+                        this.elements.addWeapon.click();
+                    } else if (type === 'armor') {
+                        this.elements.addArmor.click();
+                    }
+                }
+            } else if (e.key === 'Escape') {
+                dropdown.classList.remove('show');
+                currentIndex = -1;
+            }
+        });
+        
+        // Click outside to close
+        document.addEventListener('click', (e) => {
+            if (!inputElement.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.classList.remove('show');
+                currentIndex = -1;
+            }
+        });
+    }
+    
+    updateTypeaheadDropdown(searchTerm, dropdown, dataSource) {
+        const term = searchTerm.trim().toLowerCase();
+        
+        if (!term) {
+            dropdown.classList.remove('show');
+            return;
+        }
+        
+        // Filter items based on search term
+        const filteredItems = Object.entries(dataSource)
+            .filter(([name, data]) => name.toLowerCase().includes(term))
+            .sort(([a], [b]) => {
+                // Prioritize items that start with the search term
+                const aStarts = a.toLowerCase().startsWith(term);
+                const bStarts = b.toLowerCase().startsWith(term);
+                if (aStarts && !bStarts) return -1;
+                if (!aStarts && bStarts) return 1;
+                return a.localeCompare(b);
+            })
+            .slice(0, 10); // Limit to 10 results
+        
+        if (filteredItems.length === 0) {
+            dropdown.innerHTML = '<div class="typeahead-no-results">No items found</div>';
+            dropdown.classList.add('show');
+            return;
+        }
+        
+        // Build dropdown HTML
+        dropdown.innerHTML = filteredItems.map(([name, data]) => {
+            const attributes = [];
+            
+            // Weapon attributes
+            if (data.damage) attributes.push(`Damage: ${data.damage}`);
+            if (data.strReq) attributes.push(`STR: ${data.strReq}`);
+            if (data.dexReq) attributes.push(`DEX: ${data.dexReq}`);
+            if (data.range) attributes.push(`Range: ${data.range}`);
+            
+            // Armor attributes
+            if (data.hits) attributes.push(`Protection: ${data.hits}`);
+            if (data.dexPenalty && data.dexPenalty < 0) attributes.push(`DEX: ${data.dexPenalty}`);
+            
+            // Common attributes
+            if (data.weight) attributes.push(`Weight: ${data.weight}`);
+            if (data.cost) attributes.push(`Cost: ${data.cost}gp`);
+            
+            return `
+                <div class="typeahead-item" data-item-name="${name}">
+                    <div class="typeahead-item-name">${name}</div>
+                    ${attributes.length > 0 ? `<div class="typeahead-item-details">${attributes.join(' • ')}</div>` : ''}
+                </div>
+            `;
+        }).join('');
+        
+        dropdown.classList.add('show');
+        
+        // Add click handlers to items
+        dropdown.querySelectorAll('.typeahead-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const itemName = item.dataset.itemName;
+                const inputElement = dropdown.id === 'weapon-typeahead' ? this.elements.newWeapon : this.elements.newArmor;
+                inputElement.value = itemName;
+                dropdown.classList.remove('show');
+                
+                // Trigger add button click
+                if (dropdown.id === 'weapon-typeahead') {
+                    this.elements.addWeapon.click();
+                } else {
+                    this.elements.addArmor.click();
+                }
+            });
+        });
+    }
+    
+    highlightTypeaheadItem(items, index) {
+        items.forEach(item => item.classList.remove('active'));
+        if (index >= 0 && index < items.length) {
+            items[index].classList.add('active');
+            items[index].scrollIntoView({ block: 'nearest' });
+        }
     }
     
     updateAbilities() {
