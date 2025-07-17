@@ -601,11 +601,31 @@ h3 {
     border: 1px solid rgba(139, 69, 19, 0.3);
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     font-size: 0.95rem;
     color: #2c1810;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     transition: all 0.3s ease;
+}
+
+.equipment-info {
+    flex: 1;
+    margin-right: 10px;
+}
+
+.equipment-name {
+    font-weight: bold;
+    color: #4b2f20;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.equipment-attributes {
+    font-size: 0.85em;
+    color: #666;
+    margin-top: 2px;
+    font-style: italic;
+    line-height: 1.4;
 }
 
 .equipment-item:hover {

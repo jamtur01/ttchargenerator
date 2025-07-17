@@ -23,9 +23,9 @@ class Character {
         this.specialistAttributes = []; // Track which attributes had triples
         this.talents = [];
         this.equipment = {
-            weapons: [],
-            armor: [],
-            items: []
+            weapons: [], // Will store objects with {name, data}
+            armor: [],   // Will store objects with {name, data}
+            items: []    // Will store strings (simple items)
         };
         this.gold = 0;
         this.hasTriples = false;
@@ -281,15 +281,44 @@ class Character {
         
         if (this.classData[characterClass]) {
             const classInfo = this.classData[characterClass];
-            this.equipment.weapons = [...classInfo.equipment.filter(item => 
-                ['Sword', 'Dagger', 'Staff', 'Club'].includes(item)
-            )];
-            this.equipment.armor = [...classInfo.equipment.filter(item => 
-                ['Shield', 'Leather Armor', 'Robes', 'Basic Clothing'].includes(item)
-            )];
-            this.equipment.items = [...classInfo.equipment.filter(item => 
-                ['Lockpicks', 'Spellbook'].includes(item)
-            )];
+            
+            // Clear existing equipment
+            this.equipment.weapons = [];
+            this.equipment.armor = [];
+            this.equipment.items = [];
+            
+            // Add class-specific equipment with data
+            classInfo.equipment.forEach(itemName => {
+                if (window.EquipmentData) {
+                    // Check weapons
+                    if (window.EquipmentData.weapons[itemName]) {
+                        this.equipment.weapons.push({
+                            name: itemName,
+                            data: window.EquipmentData.weapons[itemName]
+                        });
+                    }
+                    // Check armor
+                    else if (window.EquipmentData.armor[itemName]) {
+                        this.equipment.armor.push({
+                            name: itemName,
+                            data: window.EquipmentData.armor[itemName]
+                        });
+                    }
+                    // Other items (no data)
+                    else {
+                        this.equipment.items.push(itemName);
+                    }
+                } else {
+                    // Fallback if EquipmentData not loaded
+                    if (['Sword', 'Dagger', 'Staff', 'Club'].includes(itemName)) {
+                        this.equipment.weapons.push({ name: itemName, data: null });
+                    } else if (['Shield', 'Leather Armor', 'Robes'].includes(itemName)) {
+                        this.equipment.armor.push({ name: itemName, data: null });
+                    } else {
+                        this.equipment.items.push(itemName);
+                    }
+                }
+            });
         }
     }
     
@@ -378,21 +407,60 @@ class Character {
     }
     
     addEquipment(category, itemName) {
-        if (this.equipment[category] && itemName) {
-            this.equipment[category].push(itemName);
+        if (!this.equipment[category] || !itemName) return false;
+        
+        if (category === 'items') {
+            // Simple items don't have data
+            this.equipment.items.push(itemName);
             return true;
         }
-        return false;
+        
+        // For weapons and armor, look up data
+        if (window.EquipmentData) {
+            const dataSource = category === 'weapons' ? window.EquipmentData.weapons : window.EquipmentData.armor;
+            const itemData = dataSource[itemName];
+            
+            if (itemData) {
+                this.equipment[category].push({
+                    name: itemName,
+                    data: itemData
+                });
+            } else {
+                // If not found in data, add without stats
+                this.equipment[category].push({
+                    name: itemName,
+                    data: null
+                });
+            }
+        } else {
+            // Fallback if EquipmentData not loaded
+            this.equipment[category].push({
+                name: itemName,
+                data: null
+            });
+        }
+        
+        return true;
     }
     
     removeEquipment(category, itemName) {
-        if (this.equipment[category]) {
-            const index = this.equipment[category].indexOf(itemName);
+        if (!this.equipment[category]) return false;
+        
+        if (category === 'items') {
+            const index = this.equipment.items.indexOf(itemName);
+            if (index > -1) {
+                this.equipment.items.splice(index, 1);
+                return true;
+            }
+        } else {
+            // For weapons and armor, find by name property
+            const index = this.equipment[category].findIndex(item => item.name === itemName);
             if (index > -1) {
                 this.equipment[category].splice(index, 1);
                 return true;
             }
         }
+        
         return false;
     }
     

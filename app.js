@@ -563,10 +563,71 @@ class TTCharacterGenerator {
         this.character.equipment[category].forEach(item => {
             const itemElement = document.createElement('div');
             itemElement.className = 'equipment-item';
-            itemElement.innerHTML = `
-                <span>${item}</span>
-                <button class="equipment-remove" onclick="app.removeEquipment('${category}', '${item}')">×</button>
-            `;
+            
+            if (category === 'items' || typeof item === 'string') {
+                // Simple items without data
+                const itemName = typeof item === 'string' ? item : item.name;
+                itemElement.innerHTML = `
+                    <span>${itemName}</span>
+                    <button class="equipment-remove" onclick="app.removeEquipment('${category}', '${itemName}')">×</button>
+                `;
+            } else {
+                // Weapons and armor with data
+                const itemName = item.name;
+                const itemData = item.data;
+                
+                let attributesHtml = '';
+                if (itemData) {
+                    const attributes = [];
+                    
+                    // Add damage for weapons
+                    if (itemData.damage) {
+                        attributes.push(`Damage: ${itemData.damage}`);
+                    }
+                    
+                    // Add protection for armor
+                    if (itemData.hits) {
+                        attributes.push(`Protection: ${itemData.hits} hits`);
+                    }
+                    
+                    // Add requirements
+                    if (itemData.strReq) {
+                        attributes.push(`STR: ${itemData.strReq}`);
+                    }
+                    if (itemData.dexReq) {
+                        attributes.push(`DEX: ${itemData.dexReq}`);
+                    }
+                    if (itemData.dexReqThrown) {
+                        attributes.push(`Thrown DEX: ${itemData.dexReqThrown}`);
+                    }
+                    
+                    // Add weight
+                    if (itemData.weight) {
+                        attributes.push(`Weight: ${itemData.weight} units`);
+                    }
+                    
+                    // Add range for ranged weapons
+                    if (itemData.range) {
+                        attributes.push(`Range: ${itemData.range} yds`);
+                    }
+                    
+                    // Add DEX penalty for armor
+                    if (itemData.dexPenalty && itemData.dexPenalty < 0) {
+                        attributes.push(`DEX penalty: ${itemData.dexPenalty}`);
+                    }
+                    
+                    attributesHtml = `<div class="equipment-attributes">${attributes.join(' • ')}</div>`;
+                }
+                
+                itemElement.innerHTML = `
+                    <div class="equipment-info">
+                        <span class="equipment-name">${itemName}</span>
+                        ${attributesHtml}
+                    </div>
+                    <button class="equipment-remove" onclick="app.removeEquipment('${category}', '${itemName}')">×</button>
+                `;
+            }
+            
             listElement.appendChild(itemElement);
         });
     }
@@ -675,13 +736,38 @@ class TTCharacterGenerator {
             ? abilities.map(ability => `<li>${ability}</li>`).join('')
             : '<li>No special abilities</li>';
         
-        // Get equipment lists
+        // Get equipment lists with attributes
         const weaponsHTML = character.equipment.weapons.length > 0
-            ? character.equipment.weapons.map(w => `<li>${w}</li>`).join('')
+            ? character.equipment.weapons.map(w => {
+                const itemName = typeof w === 'string' ? w : w.name;
+                const itemData = typeof w === 'object' ? w.data : null;
+                let attributes = '';
+                if (itemData) {
+                    const attrs = [];
+                    if (itemData.damage) attrs.push(`Damage: ${itemData.damage}`);
+                    if (itemData.strReq) attrs.push(`STR: ${itemData.strReq}`);
+                    if (itemData.dexReq) attrs.push(`DEX: ${itemData.dexReq}`);
+                    if (itemData.range) attrs.push(`Range: ${itemData.range} yds`);
+                    attributes = attrs.length > 0 ? ` (${attrs.join(', ')})` : '';
+                }
+                return `<li>${itemName}${attributes}</li>`;
+            }).join('')
             : '<li>None</li>';
             
         const armorHTML = character.equipment.armor.length > 0
-            ? character.equipment.armor.map(a => `<li>${a}</li>`).join('')
+            ? character.equipment.armor.map(a => {
+                const itemName = typeof a === 'string' ? a : a.name;
+                const itemData = typeof a === 'object' ? a.data : null;
+                let attributes = '';
+                if (itemData) {
+                    const attrs = [];
+                    if (itemData.hits) attrs.push(`Protection: ${itemData.hits} hits`);
+                    if (itemData.strReq) attrs.push(`STR: ${itemData.strReq}`);
+                    if (itemData.dexPenalty && itemData.dexPenalty < 0) attrs.push(`DEX penalty: ${itemData.dexPenalty}`);
+                    attributes = attrs.length > 0 ? ` (${attrs.join(', ')})` : '';
+                }
+                return `<li>${itemName}${attributes}</li>`;
+            }).join('')
             : '<li>None</li>';
             
         const itemsHTML = character.equipment.items.length > 0
