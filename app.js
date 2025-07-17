@@ -78,6 +78,7 @@ class TTCharacterGenerator {
             
             newTalent: document.getElementById('new-talent'),
             addTalent: document.getElementById('add-talent'),
+            randomTalent: document.getElementById('random-talent'),
             talentsList: document.getElementById('talents-list'),
             
             newWeapon: document.getElementById('new-weapon'),
@@ -212,6 +213,12 @@ class TTCharacterGenerator {
             this.addTalent();
         });
         
+        if (this.elements.randomTalent) {
+            this.elements.randomTalent.addEventListener('click', () => {
+                this.generateRandomTalent();
+            });
+        }
+        
         this.elements.newTalent.addEventListener('change', (e) => {
             if (e.target.value) {
                 this.addTalent();
@@ -278,6 +285,82 @@ class TTCharacterGenerator {
         
         this.character.name = name;
         this.elements.name.value = name;
+    }
+    
+    generateRandomTalent() {
+        // Check if we need to replace existing talent(s) at level 1
+        const isLevel1 = this.character.level === 1;
+        const isRogue = this.character.characterClass === 'rogue';
+        const isEvenLevel = this.character.level % 2 === 0;
+        
+        // At level 1: non-rogues get 1 talent, rogues get 2 talents
+        const maxTalentsAtLevel1 = isRogue ? 2 : 1;
+        
+        // If at level 1 and already at max talents, we need to replace
+        const shouldReplace = isLevel1 && this.character.talents.length >= maxTalentsAtLevel1;
+        
+        // Determine which talent pool to use
+        let availableTalents = [];
+        
+        if (isRogue && isEvenLevel) {
+            // Rogues on even levels can only choose from rogue-like talents
+            availableTalents = [...this.character.rogueTalents];
+        } else if (isRogue) {
+            // Rogues on odd levels can choose from all talents
+            availableTalents = [...this.character.talentsList];
+        } else {
+            // Non-rogues (or no class selected) can choose from all talents EXCEPT rogue talents
+            availableTalents = this.character.talentsList.filter(talent =>
+                !this.character.rogueTalents.includes(talent)
+            );
+        }
+        
+        // If not replacing, filter out talents the character already has
+        if (!shouldReplace) {
+            availableTalents = availableTalents.filter(talent => !this.character.talents.includes(talent));
+        }
+        
+        // Check if there are any available talents
+        if (availableTalents.length === 0) {
+            let message = 'No available talents to add.';
+            if (isRogue && isEvenLevel) {
+                message = 'No available rogue-like talents to add. Rogues can only select rogue-like talents (marked with *) on even levels.';
+            }
+            alert(message);
+            return;
+        }
+        
+        // Select a random talent
+        const randomIndex = Math.floor(Math.random() * availableTalents.length);
+        const randomTalent = availableTalents[randomIndex];
+        
+        // If we should replace, remove an existing talent first
+        if (shouldReplace) {
+            // For level 1 characters, remove a random existing talent
+            const talentToRemove = this.character.talents[Math.floor(Math.random() * this.character.talents.length)];
+            this.character.removeTalent(talentToRemove);
+        }
+        
+        // Add the new talent
+        if (this.character.addTalent(randomTalent)) {
+            // Update the dropdown to show the selected talent
+            this.elements.newTalent.value = randomTalent;
+            this.updateTalentsList();
+            
+            // Show which talent was added
+            let message = shouldReplace ? `Replaced talent with: ${randomTalent}` : `Added talent: ${randomTalent}`;
+            if (this.character.rogueTalents.includes(randomTalent)) {
+                message += ' (Rogue-like talent)';
+            }
+            
+            // Clear the dropdown after a short delay
+            setTimeout(() => {
+                this.elements.newTalent.value = '';
+            }, 1000);
+            
+            // Optional: Show alert or just let the UI update speak for itself
+            // alert(message);
+        }
     }
     
     updateRollHeightWeightButton() {
