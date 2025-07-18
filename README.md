@@ -8,7 +8,7 @@ Open `index.html` in a web browser.
 
 ## Features
 
-- Generate characters for all T&T kindreds and classes
+- Generate characters for all T&T kindreds and types
 - TARO (Triples Add and Roll Over) dice mechanics
 - Automatic specialist detection
 - Height/weight generation using official tables
@@ -18,7 +18,7 @@ Open `index.html` in a web browser.
 - Weapon and armor data from official T&T rules
 - Random talent generation
 - Weight possible calculation
-- Class and kindred abilities display
+- Type and kindred abilities display
 
 ## Requirements
 
