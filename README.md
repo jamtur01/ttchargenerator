@@ -14,7 +14,10 @@ Open `index.html` in a web browser.
 - Height/weight generation using official tables
 - Random fantasy name generator
 - Character export/import (JSON and PDF)
-- Equipment and talent tracking
+- Equipment and talent tracking with typeahead search
+- Weapon and armor data from official T&T rules
+- Random talent generation
+- Weight possible calculation
 - Class and kindred abilities display
 
 ## Requirements
@@ -28,7 +31,10 @@ Open `index.html` in a web browser.
 - `app.js` - Application logic
 - `character.js` - Character model and calculations
 - `dice.js` - Dice rolling utilities
+- `equipment-data.js` - Weapon and armor data from T&T rules
 - `styles.css` - Visual styling
+- `favicon.svg` - Site icon
+- `LICENSE` - MIT license
 
 ## Notes
 
