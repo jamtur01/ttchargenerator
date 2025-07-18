@@ -585,12 +585,12 @@ class Character {
         }
         
         if (!this.characterClass) {
-            errors.push('Character class is required');
+            errors.push('Character type is required');
         } else if (!this.canSelectClass(this.characterClass)) {
             if (this.characterClass === 'specialist' && !this.hasTriples) {
-                errors.push('Cannot select Specialist class without rolling triples');
+                errors.push('Cannot select Specialist type without rolling triples');
             } else {
-                errors.push(`Cannot select ${this.characterClass} class`);
+                errors.push(`Cannot select ${this.characterClass} type`);
             }
         }
         

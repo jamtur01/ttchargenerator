@@ -759,7 +759,7 @@ class TTCharacterGenerator {
         // Check if at max talents
         const maxTalents = this.character.getMaxTalents();
         if (this.character.talents.length >= maxTalents) {
-            alert(`Cannot add more talents. Maximum allowed: ${maxTalents} (based on level ${this.character.level} as ${this.character.characterClass || 'no class'})`);
+            alert(`Cannot add more talents. Maximum allowed: ${maxTalents} (based on level ${this.character.level} as ${this.character.characterClass || 'no type'})`);
             return;
         }
         
@@ -1007,7 +1007,7 @@ class TTCharacterGenerator {
             <span>${character.name || 'Unnamed'}</span>
         </div>
         <div class="info-group">
-            <span class="label">Class:</span>
+            <span class="label">Type:</span>
             <span>${className}</span>
         </div>
         <div class="info-group">
@@ -1288,7 +1288,7 @@ class TTCharacterGenerator {
         const abilities = this.character.getAbilities();
         
         if (abilities.length === 0) {
-            abilitiesList.innerHTML = '<li class="no-abilities">Select a class and kindred to see abilities</li>';
+            abilitiesList.innerHTML = '<li class="no-abilities">Select a type and kindred to see abilities</li>';
         } else {
             abilitiesList.innerHTML = abilities.map(ability => `<li>${ability}</li>`).join('');
         }
