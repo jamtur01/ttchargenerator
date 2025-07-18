@@ -47,7 +47,20 @@
         </section>
 
         <section class="character-info">
-          <h2>Character Information</h2>
+          <div class="section-header">
+            <h2>Character Information</h2>
+            <div class="elaborations-toggle">
+              <label class="toggle-switch">
+                <input type="checkbox" id="elaborations-toggle">
+                <span class="toggle-slider"></span>
+              </label>
+              <span class="toggle-label">Enable Elaborations</span>
+              <span class="info-icon" id="info-icon">ⓘ</span>
+              <div class="toggle-help" id="toggle-help" style="display: none;">
+                Enables optional rules including additional kindreds, character types, and other expansions from the Elaborations section
+              </div>
+            </div>
+          </div>
           <div class="field name-field">
             <label for="name">Name:</label>
             <div class="input-group">

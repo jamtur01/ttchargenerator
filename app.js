@@ -1,6 +1,7 @@
 class TTCharacterGenerator {
     constructor() {
         this.character = new Character();
+        this.elaborationsEnabled = false;
         this.initializeFantasyNameData();
         this.initializeHeightWeightTable();
         this.initializeElements();
@@ -96,7 +97,9 @@ class TTCharacterGenerator {
             gold: document.getElementById('gold'),
             
             generateName: document.getElementById('generate-name'),
-            rollHeightWeight: document.getElementById('roll-height-weight')
+            rollHeightWeight: document.getElementById('roll-height-weight'),
+            
+            elaborationsToggle: document.getElementById('elaborations-toggle')
         };
         
         this.attributeElements = {};
@@ -274,6 +277,28 @@ class TTCharacterGenerator {
         if (this.elements.rollHeightWeight) {
             this.elements.rollHeightWeight.addEventListener('click', () => {
                 this.rollHeightWeight();
+            });
+        }
+        
+        // Bind elaborations toggle
+        if (this.elements.elaborationsToggle) {
+            this.elements.elaborationsToggle.addEventListener('change', (e) => {
+                this.elaborationsEnabled = e.target.checked;
+                this.updateKindredOptions();
+                this.updateClassOptions();
+            });
+        }
+        
+        // Handle help text
+        const infoIcon = document.getElementById('info-icon');
+        const helpText = document.getElementById('toggle-help');
+        if (infoIcon && helpText) {
+            infoIcon.addEventListener('mouseenter', () => {
+                helpText.style.display = 'block';
+            });
+            
+            infoIcon.addEventListener('mouseleave', () => {
+                helpText.style.display = 'none';
             });
         }
     }
@@ -566,6 +591,60 @@ class TTCharacterGenerator {
         this.updateUI();
     }
     
+    updateKindredOptions() {
+        const kindredSelect = this.elements.kindred;
+        const currentValue = kindredSelect.value;
+        
+        // Clear existing options
+        kindredSelect.innerHTML = '<option value="">Select Kindred</option>';
+        
+        // Add basic kindreds
+        const basicKindreds = [
+            { value: 'human', name: 'Human', title: '1× all attributes, second chance on failed saving rolls' },
+            { value: 'dwarf', name: 'Dwarf', title: '2× STR & CON, 0.75× LK, 0.67× height, 2× weight' },
+            { value: 'elf', name: 'Elf', title: '0.67× CON, 1.33× DEX, 1.5× IQ/WIZ/CHA, 1.10× height' },
+            { value: 'hobb', name: 'Hobb', title: '0.5× STR, 2× CON, 1.5× DEX/LK, 0.5× height, 0.75× weight' },
+            { value: 'fairy', name: 'Fairy', title: '0.25× STR/CON, 1.75× DEX, 1.5× LK/CHA, 2× WIZ, 0.10× height, 0.01× weight' },
+            { value: 'leprechaun', name: 'Leprechaun', title: '0.33× STR, 0.67× CON, 1.5× DEX/LK/WIZ, 1.25× IQ, 0.33× height, 0.10× weight' }
+        ];
+        
+        basicKindreds.forEach(kindred => {
+            const option = document.createElement('option');
+            option.value = kindred.value;
+            option.textContent = kindred.name;
+            option.title = kindred.title;
+            kindredSelect.appendChild(option);
+        });
+        
+        // Add elaborate kindreds if enabled
+        if (this.elaborationsEnabled) {
+            // Create optgroup for elaborate kindreds
+            const optgroup = document.createElement('optgroup');
+            optgroup.label = '— Elaborate Kindreds —';
+            
+            // Sort elaborate kindreds by name
+            const elaborateKindreds = Object.entries(this.character.elaborateKindredData)
+                .map(([key, data]) => ({ value: key, ...data }))
+                .sort((a, b) => a.name.localeCompare(b.name));
+            
+            elaborateKindreds.forEach(kindred => {
+                const option = document.createElement('option');
+                option.value = kindred.value;
+                option.textContent = kindred.name;
+                option.title = kindred.description;
+                option.className = 'elaborate-option';
+                optgroup.appendChild(option);
+            });
+            
+            kindredSelect.appendChild(optgroup);
+        }
+        
+        // Restore previous selection if still available
+        if (currentValue && Array.from(kindredSelect.options).some(opt => opt.value === currentValue)) {
+            kindredSelect.value = currentValue;
+        }
+    }
+    
     updateUI() {
         this.elements.name.value = this.character.name;
         this.elements.kindred.value = this.character.kindred;
@@ -576,6 +655,9 @@ class TTCharacterGenerator {
         this.elements.weight.value = this.character.weight;
         this.elements.level.value = this.character.level;
         this.elements.gold.value = this.character.gold;
+        
+        // Update dropdowns based on elaborations
+        this.updateKindredOptions();
         
         Object.keys(this.attributeElements).forEach(attr => {
             const attrData = this.character.attributes[attr];
@@ -618,28 +700,81 @@ class TTCharacterGenerator {
     }
     
     updateClassOptions() {
-        const availableClasses = this.character.getAvailableClasses();
+        const availableClasses = this.character.getAvailableClasses(this.elaborationsEnabled);
         const classSelect = this.elements.characterClass;
+        const currentValue = classSelect.value;
         
-        Array.from(classSelect.options).forEach(option => {
-            if (option.value && !availableClasses.includes(option.value)) {
+        // Clear existing options
+        classSelect.innerHTML = '<option value="">Select Type</option>';
+        
+        // Basic classes
+        const basicClasses = [
+            { value: 'warrior', name: 'Warrior', title: 'Weapon/armor bonuses, no magic ability' },
+            { value: 'rogue', name: 'Rogue', title: 'Can use weapons and magic, starts with 2 talents' },
+            { value: 'wizard', name: 'Wizard', title: 'Knows all 1st level spells, limited to 2d6 weapons' },
+            { value: 'specialist', name: 'Specialist', title: 'Must roll triples on an attribute, has exceptional abilities' }
+        ];
+        
+        basicClasses.forEach(cls => {
+            const option = document.createElement('option');
+            option.value = cls.value;
+            option.textContent = cls.name;
+            option.title = cls.title;
+            
+            if (!availableClasses.includes(cls.value)) {
                 option.disabled = true;
-                if (option.value === 'citizen' && this.character.hasTriples) {
-                    option.title = 'Cannot select Citizen when triples were rolled';
-                } else if (option.value === 'specialist' && !this.character.hasTriples) {
+                
+                // Add specific disabled reasons
+                if (cls.value === 'specialist' && !this.character.hasTriples) {
                     option.title = 'Specialist requires rolling triples on at least one attribute';
-                } else if (option.value === 'wizard' && 
-                          (this.character.attributes.iq.current < 10 || 
+                } else if (cls.value === 'wizard' &&
+                          (this.character.attributes.iq.current < 10 ||
                            this.character.attributes.dex.current < 10)) {
                     option.title = 'Wizard requires IQ 10+ and DEX 10+';
-                } else {
-                    option.title = `Requirements not met for ${option.textContent}`;
                 }
-            } else {
-                option.disabled = false;
-                option.title = '';
             }
+            
+            classSelect.appendChild(option);
         });
+        
+        // Add elaborate classes if enabled
+        if (this.elaborationsEnabled) {
+            const optgroup = document.createElement('optgroup');
+            optgroup.label = '— Elaborate Types —';
+            
+            const elaborateClasses = [
+                { value: 'citizen', name: 'Citizen', title: 'Average folk with no special training' },
+                { value: 'paragon', name: 'Paragon', title: 'Combined warrior and wizard abilities' }
+            ];
+            
+            elaborateClasses.forEach(cls => {
+                const option = document.createElement('option');
+                option.value = cls.value;
+                option.textContent = cls.name;
+                option.title = cls.title;
+                option.className = 'elaborate-option';
+                
+                if (!availableClasses.includes(cls.value)) {
+                    option.disabled = true;
+                    
+                    // Add specific disabled reasons
+                    if (cls.value === 'citizen' && this.character.hasTriples) {
+                        option.title = 'Cannot select Citizen when triples were rolled';
+                    } else if (cls.value === 'paragon') {
+                        option.title = 'Paragon requires 12+ in at least 6 of 8 attributes';
+                    }
+                }
+                
+                optgroup.appendChild(option);
+            });
+            
+            classSelect.appendChild(optgroup);
+        }
+        
+        // Restore previous selection if still available
+        if (currentValue && availableClasses.includes(currentValue)) {
+            classSelect.value = currentValue;
+        }
     }
     
     updateSpecialistInfo() {
