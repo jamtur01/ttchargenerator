@@ -227,7 +227,7 @@ h3 {
 
 .attributes-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr;
+    grid-template-columns: 2fr 1fr 1fr;
     gap: 20px;
     align-items: center;
     background: rgba(255, 248, 220, 0.3);

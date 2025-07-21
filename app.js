@@ -106,8 +106,7 @@ class TTCharacterGenerator {
         ['str', 'con', 'dex', 'spd', 'lk', 'iq', 'wiz', 'cha'].forEach(attr => {
             this.attributeElements[attr] = {
                 current: document.getElementById(`${attr}-current`),
-                max: document.getElementById(`${attr}-max`),
-                modifier: document.getElementById(`${attr}-modifier`)
+                max: document.getElementById(`${attr}-max`)
             };
         });
     }
@@ -684,12 +683,6 @@ class TTCharacterGenerator {
     }
     
     updateModifiers() {
-        // Update attribute modifiers (for display only)
-        Object.keys(this.attributeElements).forEach(attr => {
-            const modifier = this.character.calculateModifier(this.character.attributes[attr].current);
-            this.attributeElements[attr].modifier.textContent = modifier >= 0 ? `+${modifier}` : `${modifier}`;
-        });
-        
         // Update total combat adds (only STR, DEX, SPD, LK > 12)
         const adds = this.character.calculateTotalAdds();
         this.elements.totalAdds.textContent = adds >= 0 ? `+${adds}` : adds;
