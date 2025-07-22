@@ -987,53 +987,51 @@ class TTCharacterGenerator {
         const kindredName = character.kindredData[character.kindred]?.name || 'Unknown';
         const className = character.classData[character.characterClass]?.name || 'Unknown';
         
-        // Get abilities
-        const abilities = character.getAbilities();
-        const abilitiesHTML = abilities.length > 0
-            ? abilities.map(ability => `<li>${ability}</li>`).join('')
-            : '<li>No special abilities</li>';
+        // Get equipment lists
+        const weaponsLines = [];
+        character.equipment.weapons.forEach(w => {
+            const itemName = typeof w === 'string' ? w : w.name;
+            const itemData = typeof w === 'object' ? w.data : null;
+            if (itemData && itemData.damage) {
+                weaponsLines.push(`${itemName} (${itemData.damage})`);
+            } else {
+                weaponsLines.push(itemName);
+            }
+        });
         
-        // Get equipment lists with attributes
-        const weaponsHTML = character.equipment.weapons.length > 0
-            ? character.equipment.weapons.map(w => {
-                const itemName = typeof w === 'string' ? w : w.name;
-                const itemData = typeof w === 'object' ? w.data : null;
-                let attributes = '';
-                if (itemData) {
-                    const attrs = [];
-                    if (itemData.damage) attrs.push(`Damage: ${itemData.damage}`);
-                    if (itemData.strReq) attrs.push(`STR: ${itemData.strReq}`);
-                    if (itemData.dexReq) attrs.push(`DEX: ${itemData.dexReq}`);
-                    if (itemData.range) attrs.push(`Range: ${itemData.range} yds`);
-                    attributes = attrs.length > 0 ? ` (${attrs.join(', ')})` : '';
-                }
-                return `<li>${itemName}${attributes}</li>`;
-            }).join('')
-            : '<li>None</li>';
-            
-        const armorHTML = character.equipment.armor.length > 0
-            ? character.equipment.armor.map(a => {
-                const itemName = typeof a === 'string' ? a : a.name;
-                const itemData = typeof a === 'object' ? a.data : null;
-                let attributes = '';
-                if (itemData) {
-                    const attrs = [];
-                    if (itemData.hits) attrs.push(`Protection: ${itemData.hits} hits`);
-                    if (itemData.strReq) attrs.push(`STR: ${itemData.strReq}`);
-                    if (itemData.dexPenalty && itemData.dexPenalty < 0) attrs.push(`DEX penalty: ${itemData.dexPenalty}`);
-                    attributes = attrs.length > 0 ? ` (${attrs.join(', ')})` : '';
-                }
-                return `<li>${itemName}${attributes}</li>`;
-            }).join('')
-            : '<li>None</li>';
-            
-        const itemsHTML = character.equipment.items.length > 0
-            ? character.equipment.items.map(i => `<li>${i}</li>`).join('')
-            : '<li>None</li>';
-            
-        const talentsHTML = character.talents.length > 0
-            ? character.talents.map(t => `<li>${t}</li>`).join('')
-            : '<li>None</li>';
+        const armorLines = [];
+        character.equipment.armor.forEach(a => {
+            const itemName = typeof a === 'string' ? a : a.name;
+            const itemData = typeof a === 'object' ? a.data : null;
+            if (itemData && itemData.hits) {
+                armorLines.push(`${itemName} (${itemData.hits} hits)`);
+            } else {
+                armorLines.push(itemName);
+            }
+        });
+        
+        const equipmentLines = character.equipment.items.slice();
+        
+        // Combine armor and other equipment
+        const allEquipment = [...armorLines, ...equipmentLines];
+        
+        // Get talents
+        const talents = character.talents.slice();
+        
+        // Calculate weights
+        let wtPossible = Math.floor(character.attributes.str.current * 100);
+        let wtCarried = 0;
+        
+        character.equipment.weapons.forEach(w => {
+            if (typeof w === 'object' && w.data && w.data.weight) {
+                wtCarried += parseFloat(w.data.weight) || 0;
+            }
+        });
+        character.equipment.armor.forEach(a => {
+            if (typeof a === 'object' && a.data && a.data.weight) {
+                wtCarried += parseFloat(a.data.weight) || 0;
+            }
+        });
         
         const html = `
 <!DOCTYPE html>
@@ -1043,207 +1041,488 @@ class TTCharacterGenerator {
     <style>
         @page {
             size: letter;
-            margin: 0.5in;
+            margin: 0.3in;
         }
         @media print {
-            body { margin: 0; }
+            body { 
+                margin: 0;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
         }
         body {
-            font-family: 'Georgia', serif;
-            line-height: 1.4;
-            color: #2c1810;
-            margin: 20px;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 11px;
+            line-height: 1.2;
+            margin: 0;
+            padding: 10px;
+            background: white;
         }
-        h1, h2, h3 {
-            font-family: 'Times New Roman', serif;
-            text-transform: uppercase;
-            margin: 10px 0;
+        .sheet {
+            width: 7.5in;
+            margin: 0 auto;
+            border: 3px solid black;
+            padding: 15px;
+            position: relative;
         }
-        h1 {
+        .decorative-border {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            bottom: 5px;
+            left: 5px;
+            border: 1px solid black;
+            pointer-events: none;
+        }
+        .header {
             text-align: center;
+            margin-bottom: 10px;
+        }
+        .header h1 {
+            font-size: 26px;
+            font-weight: bold;
+            margin: 0;
+            font-family: 'Arial Black', sans-serif;
+            letter-spacing: -1px;
+        }
+        .header h2 {
+            font-size: 16px;
+            margin: 0;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+        .logo {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: white;
+            border: 2px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 24px;
-            border-bottom: 3px double #2c1810;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
         }
-        h2 {
-            font-size: 18px;
-            border-bottom: 2px solid #2c1810;
-            margin-top: 20px;
+        .basic-info {
+            margin-bottom: 10px;
         }
-        .header-info {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin-bottom: 20px;
+        .portrait-box {
+            border: 2px solid black;
+            height: 140px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #999;
+            font-style: italic;
+            margin-bottom: 6px;
         }
-        .info-group {
+        .info-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 6px;
+        }
+        .info-item {
+            flex: 1;
             display: flex;
             align-items: baseline;
-            gap: 5px;
         }
-        .label {
+        .info-label {
             font-weight: bold;
+            text-transform: uppercase;
+            font-size: 11px;
+            margin-right: 5px;
         }
-        .attributes-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 10px 0;
+        .info-value {
+            border-bottom: 1px solid black;
+            flex: 1;
+            padding: 0 2px;
+            min-height: 16px;
         }
-        .attributes-table th,
-        .attributes-table td {
-            border: 1px solid #2c1810;
-            padding: 5px 10px;
+        .main-columns {
+            display: flex;
+            gap: 15px;
+        }
+        .left-column {
+            flex: 1;
+        }
+        .right-column {
+            flex: 1.1;
+        }
+        .section-title {
+            font-weight: bold;
             text-align: center;
+            border: 2px solid black;
+            padding: 3px;
+            margin-bottom: 8px;
+            background: white;
+            font-size: 11px;
+            letter-spacing: 1px;
         }
-        .attributes-table th {
-            background-color: #f0f0f0;
+        .attributes-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        .physical-attrs, .mental-attrs {
+            flex: 1;
+        }
+        .attr-group-label {
+            font-style: italic;
+            text-align: center;
+            font-size: 10px;
+            margin-bottom: 5px;
+        }
+        .attribute-row {
+            display: flex;
+            align-items: stretch;
+            border: 1px solid black;
+            margin-bottom: -1px;
+            height: 24px;
+        }
+        .attr-box {
+            width: 32px;
+            border-right: 1px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+        .attr-label {
+            flex: 1;
+            padding: 0 5px;
+            display: flex;
+            align-items: center;
+            font-size: 11px;
+        }
+        .attr-name {
+            font-weight: bold;
+            font-size: 13px;
+        }
+        .attr-full {
+            font-size: 9px;
+            margin-left: 3px;
+        }
+        .attr-value-box {
+            width: 40px;
+            border-left: 1px solid black;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
             font-weight: bold;
         }
         .combat-adds {
+            border: 2px solid black;
+            padding: 6px;
             text-align: center;
+            margin-bottom: 8px;
+        }
+        .combat-adds-label {
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .combat-adds-value {
             font-size: 18px;
             font-weight: bold;
-            margin: 15px 0;
-            padding: 10px;
-            border: 2px solid #2c1810;
+            margin: 3px 0;
         }
-        ul {
-            margin: 5px 0;
-            padding-left: 25px;
+        .combat-adds-note {
+            font-size: 8px;
+            font-style: italic;
+            line-height: 1.1;
         }
-        .equipment-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
+        .weight-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        .weight-box {
+            flex: 1;
+            text-align: center;
+        }
+        .weight-label {
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .weight-value {
+            border-bottom: 1px solid black;
+            margin-top: 2px;
+            padding: 2px;
+            font-size: 12px;
+        }
+        .equipment-section {
+            margin-bottom: 8px;
+        }
+        .weapons-section {
+            margin-bottom: 8px;
+        }
+        .equipment-lines {
+            border: 1px solid black;
+            padding: 5px;
+        }
+        .equipment-lines.tall {
+            padding-bottom: 7px;
+        }
+        .ap-box {
+            border: 2px solid black;
+            padding: 4px 8px;
+            margin-bottom: 6px;
+            margin-left: 0;
+            margin-right: 0;
+        }
+        .ap-header {
+            font-weight: bold;
+            font-size: 10px;
+            text-align: left;
+            letter-spacing: 1px;
+        }
+        .talents-section, .spells-section {
+            margin-bottom: 8px;
+        }
+        .section-lines {
+            border: 1px solid black;
+            padding: 5px;
+        }
+        .line {
+            border-bottom: 1px solid #ccc;
+            height: 16px;
+            margin-bottom: 2px;
+            font-size: 10px;
+            padding: 1px 2px;
+        }
+        .line:last-child {
+            border-bottom: none;
+        }
+        .weapons-lines {
+            border: 1px solid black;
+            padding: 5px;
         }
         .footer {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 2px solid #2c1810;
-            font-size: 12px;
+            margin-top: 15px;
+            font-size: 9px;
             text-align: center;
+            font-style: italic;
+        }
+        .note-text {
+            font-size: 9px;
+            font-style: italic;
+            text-align: right;
+            margin-top: 5px;
         }
     </style>
 </head>
 <body>
-    <h1>Tunnels & Trolls Character Sheet</h1>
-    
-    <div class="header-info">
-        <div class="info-group">
-            <span class="label">Name:</span>
-            <span>${character.name || 'Unnamed'}</span>
+    <div class="sheet">
+        <div class="decorative-border"></div>
+        <div class="logo">🐉</div>
+        
+        <div class="header">
+            <h1>TUNNELS & TROLLS</h1>
+            <h2>CHARACTER SHEET</h2>
         </div>
-        <div class="info-group">
-            <span class="label">Type:</span>
-            <span>${className}</span>
+        
+        <div class="basic-info">
+            <div class="info-row">
+                <div class="info-item" style="flex: 2;">
+                    <span class="info-label">NAME:</span>
+                    <span class="info-value">${character.name || ''}</span>
+                </div>
+            </div>
+            <div class="info-row">
+                <div class="info-item">
+                    <span class="info-label">KINDRED:</span>
+                    <span class="info-value">${kindredName}</span>
+                </div>
+                <div class="info-item" style="flex: 0.5;">
+                    <span class="info-label">LEVEL:</span>
+                    <span class="info-value">${character.level}</span>
+                </div>
+            </div>
+            <div class="info-row">
+                <div class="info-item" style="flex: 2;">
+                    <span class="info-label">CHARACTER TYPE:</span>
+                    <span class="info-value">${className}</span>
+                </div>
+            </div>
+            <div class="info-row">
+                <div class="info-item">
+                    <span class="info-label">GENDER:</span>
+                    <span class="info-value">${character.gender || ''}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">HEIGHT:</span>
+                    <span class="info-value">${character.height || ''}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">WEIGHT:</span>
+                    <span class="info-value">${character.weight || ''}</span>
+                </div>
+            </div>
+            <div class="info-row">
+                <div class="info-item">
+                    <span class="info-label">AGE:</span>
+                    <span class="info-value">${character.age || ''}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">HAIR:</span>
+                    <span class="info-value"></span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">MONEY:</span>
+                    <span class="info-value">${character.gold} gp</span>
+                </div>
+            </div>
         </div>
-        <div class="info-group">
-            <span class="label">Level:</span>
-            <span>${character.level}</span>
+        
+        <div class="main-columns">
+            <div class="left-column">
+                <div class="section-title">PRIME ATTRIBUTES:</div>
+                
+                <div class="attributes-container">
+                    <div class="physical-attrs">
+                        <div class="attr-group-label">Physical</div>
+                        <div class="attribute-row">
+                            <div class="attr-box">▢</div>
+                            <div class="attr-label">
+                                <span class="attr-name">STR</span>
+                                <span class="attr-full">Strength*</span>
+                            </div>
+                            <div class="attr-value-box">${character.attributes.str.current}</div>
+                        </div>
+                        <div class="attribute-row">
+                            <div class="attr-box">▢</div>
+                            <div class="attr-label">
+                                <span class="attr-name">CON</span>
+                                <span class="attr-full">Constitution</span>
+                            </div>
+                            <div class="attr-value-box">${character.attributes.con.current}</div>
+                        </div>
+                        <div class="attribute-row">
+                            <div class="attr-box">▢</div>
+                            <div class="attr-label">
+                                <span class="attr-name">DEX</span>
+                                <span class="attr-full">Dexterity*</span>
+                            </div>
+                            <div class="attr-value-box">${character.attributes.dex.current}</div>
+                        </div>
+                        <div class="attribute-row">
+                            <div class="attr-box">▢</div>
+                            <div class="attr-label">
+                                <span class="attr-name">SPD</span>
+                                <span class="attr-full">Speed*</span>
+                            </div>
+                            <div class="attr-value-box">${character.attributes.spd.current}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mental-attrs">
+                        <div class="attr-group-label">Mental</div>
+                        <div class="attribute-row">
+                            <div class="attr-box"></div>
+                            <div class="attr-label">
+                                <span class="attr-name">LK</span>
+                                <span class="attr-full">Luck*</span>
+                            </div>
+                            <div class="attr-value-box">${character.attributes.lk.current}</div>
+                        </div>
+                        <div class="attribute-row">
+                            <div class="attr-box"></div>
+                            <div class="attr-label">
+                                <span class="attr-name">IQ</span>
+                                <span class="attr-full">Intelligence</span>
+                            </div>
+                            <div class="attr-value-box">${character.attributes.iq.current}</div>
+                        </div>
+                        <div class="attribute-row">
+                            <div class="attr-box"></div>
+                            <div class="attr-label">
+                                <span class="attr-name">WIZ</span>
+                                <span class="attr-full">Wizardry</span>
+                            </div>
+                            <div class="attr-value-box">${character.attributes.wiz.current}</div>
+                        </div>
+                        <div class="attribute-row">
+                            <div class="attr-box"></div>
+                            <div class="attr-label">
+                                <span class="attr-name">CHA</span>
+                                <span class="attr-full">Charisma</span>
+                            </div>
+                            <div class="attr-value-box">${character.attributes.cha.current}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="combat-adds">
+                    <div class="combat-adds-label">PERSONAL / COMBAT ADDS:</div>
+                    <div class="combat-adds-value">${character.calculateTotalAdds() >= 0 ? '+' : ''}${character.calculateTotalAdds()}</div>
+                    <div class="combat-adds-note">*Your character receives a BONUS of one point for each of the following attributes over 12: STR, LK, DEX & SPD.</div>
+                </div>
+                
+                <div class="weight-section">
+                    <div class="weight-box">
+                        <div class="weight-label">WT. POSSIBLE:</div>
+                        <div class="weight-value">${wtPossible}</div>
+                    </div>
+                    <div class="weight-box">
+                        <div class="weight-label">WT. CARRIED:</div>
+                        <div class="weight-value">${Math.floor(wtCarried)}</div>
+                    </div>
+                </div>
+                
+                <div class="equipment-section">
+                    <div class="section-title">EQUIPMENT:</div>
+                    <div class="equipment-lines tall">
+                        ${allEquipment.slice(0, 18).map(item => `<div class="line">${item}</div>`).join('')}
+                        ${allEquipment.length < 18 ? Array(18 - allEquipment.length).fill('<div class="line"></div>').join('') : ''}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="right-column">
+                <div class="portrait-box">Character portrait</div>
+                <div class="ap-box">
+                    <div class="ap-header">ADVENTURE POINTS:</div>
+                </div>
+                
+                <div class="talents-section">
+                    <div class="section-title">TALENTS:</div>
+                    <div class="section-lines">
+                        ${talents.slice(0, 5).map(talent => `<div class="line">${talent}</div>`).join('')}
+                        ${talents.length < 5 ? Array(5 - talents.length).fill('<div class="line"></div>').join('') : ''}
+                    </div>
+                </div>
+                
+                <div class="weapons-section">
+                    <div class="section-title">WEAPONS:</div>
+                    <div class="section-lines">
+                        ${weaponsLines.slice(0, 6).map(weapon => `<div class="line">${weapon}</div>`).join('')}
+                        ${weaponsLines.length < 6 ? Array(6 - weaponsLines.length).fill('<div class="line"></div>').join('') : ''}
+                    </div>
+                </div>
+                
+                <div class="spells-section">
+                    <div class="section-title">SPELLS/MAGIC ITEMS:</div>
+                    <div class="section-lines">
+                        <div class="line"></div>
+                        <div class="line"></div>
+                        <div class="line"></div>
+                        <div class="line"></div>
+                        <div class="line"></div>
+                        <div class="line"></div>
+                        <div class="line"></div>
+                    </div>
+                </div>
+                
+                <div class="note-text">List additional items & spells on the back.</div>
+            </div>
         </div>
-        <div class="info-group">
-            <span class="label">Kindred:</span>
-            <span>${kindredName}</span>
+        
+        <div class="footer">
+            Permission to copy this page is granted by Flying Buffalo Inc.
         </div>
-        <div class="info-group">
-            <span class="label">Gender:</span>
-            <span>${character.gender || 'Not specified'}</span>
-        </div>
-        <div class="info-group">
-            <span class="label">Age:</span>
-            <span>${character.age || 'Not specified'}</span>
-        </div>
-        <div class="info-group">
-            <span class="label">Height:</span>
-            <span>${character.height || 'Not specified'}</span>
-        </div>
-        <div class="info-group">
-            <span class="label">Weight:</span>
-            <span>${character.weight || 'Not specified'}</span>
-        </div>
-        <div class="info-group">
-            <span class="label">Gold:</span>
-            <span>${character.gold} gp</span>
-        </div>
-    </div>
-    
-    <h2>Attributes</h2>
-    <table class="attributes-table">
-        <tr>
-            <th>Attribute</th>
-            <th>Current</th>
-            <th>Max</th>
-        </tr>
-        <tr>
-            <td><strong>STR</strong> (Strength)</td>
-            <td>${character.attributes.str.current}</td>
-            <td>${character.attributes.str.max}</td>
-        </tr>
-        <tr>
-            <td><strong>CON</strong> (Constitution)</td>
-            <td>${character.attributes.con.current}</td>
-            <td>${character.attributes.con.max}</td>
-        </tr>
-        <tr>
-            <td><strong>DEX</strong> (Dexterity)</td>
-            <td>${character.attributes.dex.current}</td>
-            <td>${character.attributes.dex.max}</td>
-        </tr>
-        <tr>
-            <td><strong>SPD</strong> (Speed)</td>
-            <td>${character.attributes.spd.current}</td>
-            <td>${character.attributes.spd.max}</td>
-        </tr>
-        <tr>
-            <td><strong>LK</strong> (Luck)</td>
-            <td>${character.attributes.lk.current}</td>
-            <td>${character.attributes.lk.max}</td>
-        </tr>
-        <tr>
-            <td><strong>IQ</strong> (Intelligence)</td>
-            <td>${character.attributes.iq.current}</td>
-            <td>${character.attributes.iq.max}</td>
-        </tr>
-        <tr>
-            <td><strong>WIZ</strong> (Wizardry)</td>
-            <td>${character.attributes.wiz.current}</td>
-            <td>${character.attributes.wiz.max}</td>
-        </tr>
-        <tr>
-            <td><strong>CHA</strong> (Charisma)</td>
-            <td>${character.attributes.cha.current}</td>
-            <td>${character.attributes.cha.max}</td>
-        </tr>
-    </table>
-    
-    <div class="combat-adds">
-        Personal Adds: ${character.calculateTotalAdds() >= 0 ? '+' : ''}${character.calculateTotalAdds()}
-    </div>
-    
-    <h2>Character Abilities</h2>
-    <ul>${abilitiesHTML}</ul>
-    
-    <h2>Talents</h2>
-    <ul>${talentsHTML}</ul>
-    
-    <h2>Equipment</h2>
-    <div class="equipment-grid">
-        <div>
-            <h3>Weapons</h3>
-            <ul>${weaponsHTML}</ul>
-        </div>
-        <div>
-            <h3>Armor</h3>
-            <ul>${armorHTML}</ul>
-        </div>
-    </div>
-    <h3>Other Items</h3>
-    <ul>${itemsHTML}</ul>
-    
-    <div class="footer">
-        <p>Tunnels & Trolls™ is a trademark of Flying Buffalo Inc.</p>
-        <p>Character generated on ${new Date().toLocaleDateString()}</p>
     </div>
     
     <script>
