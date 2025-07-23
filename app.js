@@ -66,6 +66,7 @@ class TTCharacterGenerator {
             age: document.getElementById('age'),
             height: document.getElementById('height'),
             weight: document.getElementById('weight'),
+            hair: document.getElementById('hair'),
             level: document.getElementById('level'),
             
             rollAttributes: document.getElementById('roll-attributes'),
@@ -172,6 +173,10 @@ class TTCharacterGenerator {
         
         this.elements.weight.addEventListener('input', (e) => {
             this.character.weight = parseInt(e.target.value) || 0;
+        });
+        
+        this.elements.hair.addEventListener('input', (e) => {
+            this.character.hair = e.target.value;
         });
         
         this.elements.level.addEventListener('input', (e) => {
@@ -652,6 +657,7 @@ class TTCharacterGenerator {
         this.elements.age.value = this.character.age;
         this.elements.height.value = this.character.height;
         this.elements.weight.value = this.character.weight;
+        this.elements.hair.value = this.character.hair;
         this.elements.level.value = this.character.level;
         this.elements.gold.value = this.character.gold;
         
@@ -1368,7 +1374,7 @@ class TTCharacterGenerator {
                 </div>
                 <div class="info-item">
                     <span class="info-label">HAIR:</span>
-                    <span class="info-value"></span>
+                    <span class="info-value">${character.hair || ''}</span>
                 </div>
                 <div class="info-item">
                     <span class="info-label">MONEY:</span>

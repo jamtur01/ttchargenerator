@@ -7,6 +7,7 @@ class Character {
         this.age = 0;
         this.height = '';
         this.weight = 0;
+        this.hair = '';
         this.level = 1;
         
         this.attributes = {
@@ -816,6 +817,7 @@ class Character {
             age: this.age,
             height: this.height,
             weight: this.weight,
+            hair: this.hair,
             level: this.level,
             attributes: this.attributes,
             specialistAttributes: this.specialistAttributes,
@@ -838,6 +840,7 @@ class Character {
             this.age = characterData.age || 0;
             this.height = characterData.height || '';
             this.weight = characterData.weight || 0;
+            this.hair = characterData.hair || '';
             this.level = characterData.level || 1;
             
             if (characterData.attributes) {
