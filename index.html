@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Tunnels & Trolls Character Generator</title>
-    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -51,13 +51,14 @@
             <h2>Character Information</h2>
             <div class="elaborations-toggle">
               <label class="toggle-switch">
-                <input type="checkbox" id="elaborations-toggle">
+                <input type="checkbox" id="elaborations-toggle" />
                 <span class="toggle-slider"></span>
               </label>
               <span class="toggle-label">Enable Elaborations</span>
               <span class="info-icon" id="info-icon">ⓘ</span>
-              <div class="toggle-help" id="toggle-help" style="display: none;">
-                Enables optional rules including additional kindreds, character types, and other expansions from the Elaborations section
+              <div class="toggle-help" id="toggle-help" style="display: none">
+                Enables optional rules including additional kindreds, character
+                types, and other expansions from the Elaborations section
               </div>
             </div>
           </div>
@@ -483,7 +484,13 @@
                 <option value="">Select a talent</option>
               </select>
               <button id="add-talent" class="btn btn-small">Add Talent</button>
-              <button id="random-talent" class="btn btn-small" title="Get a random talent">Random</button>
+              <button
+                id="random-talent"
+                class="btn btn-small"
+                title="Get a random talent"
+              >
+                Random
+              </button>
             </div>
             <div id="talents-list" class="talents-list"></div>
           </div>
@@ -531,7 +538,12 @@
             <div class="equipment-section">
               <h3>Items</h3>
               <div class="equipment-input">
-                <input type="text" id="new-item" placeholder="Item name" autocomplete="off" />
+                <input
+                  type="text"
+                  id="new-item"
+                  placeholder="Item name"
+                  autocomplete="off"
+                />
                 <button id="add-item" class="btn btn-small">Add</button>
               </div>
               <div id="items-list" class="equipment-list"></div>
@@ -628,4 +640,18 @@
     <script src="character.js"></script>
     <script src="app.js"></script>
   </body>
+  <script type="text/javascript">
+    var _gauges = _gauges || [];
+    (function () {
+      var t = document.createElement("script");
+      t.type = "text/javascript";
+      t.async = true;
+      t.id = "gauges-tracker";
+      t.setAttribute("data-site-id", "6885224b0d85105ccc28dc2f");
+      t.setAttribute("data-track-path", "https://track.gaug.es/track.gif");
+      t.src = "https://d2fuc4clr7gvcn.cloudfront.net/track.js";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(t, s);
+    })();
+  </script>
 </html>
