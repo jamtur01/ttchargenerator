@@ -523,13 +523,15 @@ class Character {
                 const modifier = modifiers[attr];
                 
                 // Apply modifier and round appropriately
-                let newValue = Math.floor(baseValue * modifier);
+                let newValue;
                 if (modifier > 1) {
                     // Round down for multipliers > 1
                     newValue = Math.floor(baseValue * modifier);
                 } else if (modifier < 1) {
                     // Round up for multipliers < 1
                     newValue = Math.ceil(baseValue * modifier);
+                } else {
+                    newValue = baseValue;
                 }
                 
                 // Ensure minimum value of 1

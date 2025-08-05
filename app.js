@@ -563,6 +563,37 @@ class TTCharacterGenerator {
         this.announceToScreenReader(`Height: ${height}, Weight: ${weight} lbs`);
     }
     
+    handleTAROResults(results) {
+        // Automatically set class to specialist
+        this.character.setClass('specialist');
+        
+        let message = 'Triples rolled! TARO (Triples Add and Roll Over) applied:\n\n';
+        
+        this.character.specialistAttributes.forEach(attr => {
+            const result = results[attr];
+            message += `${attr.toUpperCase()}: `;
+            
+            // Show all roll sets
+            result.rollSets.forEach((set, index) => {
+                message += `${set.join(',')}`;
+                if (index < result.rollSets.length - 1) {
+                    message += ' → ';
+                }
+            });
+            
+            message += ` = ${result.total}\n`;
+        });
+        
+        const specialistType = this.character.getSpecialistType();
+        if (specialistType) {
+            message += `\nSpecialist Type: ${specialistType}`;
+            message += `\n\nYou are now a Specialist!`;
+        }
+        
+        alert(message);
+        this.announceToScreenReader(`TARO! You are now a ${specialistType || 'Specialist'}`);
+    }
+    
     rollNewCharacter() {
         // Always use TARO when rolling new attributes
         const results = this.character.rollNewAttributes(true);
@@ -575,34 +606,7 @@ class TTCharacterGenerator {
         
         // Show TARO results if any triples were rolled
         if (this.character.hasTriples) {
-            // Automatically set class to specialist
-            this.character.setClass('specialist');
-            
-            let message = 'Triples rolled! TARO (Triples Add and Roll Over) applied:\n\n';
-            
-            this.character.specialistAttributes.forEach(attr => {
-                const result = results[attr];
-                message += `${attr.toUpperCase()}: `;
-                
-                // Show all roll sets
-                result.rollSets.forEach((set, index) => {
-                    message += `${set.join(',')}`;
-                    if (index < result.rollSets.length - 1) {
-                        message += ' → ';
-                    }
-                });
-                
-                message += ` = ${result.total}\n`;
-            });
-            
-            const specialistType = this.character.getSpecialistType();
-            if (specialistType) {
-                message += `\nSpecialist Type: ${specialistType}`;
-                message += `\n\nYou are now a Specialist!`;
-            }
-            
-            alert(message);
-            this.announceToScreenReader(`TARO! You are now a ${specialistType || 'Specialist'}`);
+            this.handleTAROResults(results);
         }
         
         setTimeout(() => {
@@ -617,35 +621,9 @@ class TTCharacterGenerator {
     rerollAttributes() {
         const results = this.character.rollNewAttributes(true);
         
-        // If triples were rolled, automatically set to specialist
+        // If triples were rolled, handle TARO
         if (this.character.hasTriples) {
-            this.character.setClass('specialist');
-            
-            let message = 'Triples rolled! TARO (Triples Add and Roll Over) applied:\n\n';
-            
-            this.character.specialistAttributes.forEach(attr => {
-                const result = results[attr];
-                message += `${attr.toUpperCase()}: `;
-                
-                // Show all roll sets
-                result.rollSets.forEach((set, index) => {
-                    message += `${set.join(',')}`;
-                    if (index < result.rollSets.length - 1) {
-                        message += ' → ';
-                    }
-                });
-                
-                message += ` = ${result.total}\n`;
-            });
-            
-            const specialistType = this.character.getSpecialistType();
-            if (specialistType) {
-                message += `\nSpecialist Type: ${specialistType}`;
-                message += `\n\nYou are now a Specialist!`;
-            }
-            
-            alert(message);
-            this.announceToScreenReader(`TARO! You are now a ${specialistType || 'Specialist'}`);
+            this.handleTAROResults(results);
         }
         
         this.character.applyKindredModifiers();
@@ -1618,7 +1596,6 @@ class TTCharacterGenerator {
     initializeTypeahead(type, inputElement, dropdownId, dataSource) {
         const dropdown = document.getElementById(dropdownId);
         let currentIndex = -1;
-        let filteredItems = [];
         
         // Focus and input events
         inputElement.addEventListener('focus', () => {
