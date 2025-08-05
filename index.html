@@ -15,15 +15,15 @@
   </head>
   <body>
     <div class="container">
-      <header>
+      <header role="banner">
         <h1>Tunnels & Trolls<br />Character Generator</h1>
         <p>Create your deluxe edition T&T character</p>
       </header>
 
-      <main class="character-sheet">
+      <main class="character-sheet" role="main" aria-label="Character sheet creation form">
         <!-- Documentation Section -->
-        <section class="documentation" id="help-section" style="display: none">
-          <h4>Quick Guide</h4>
+        <section class="documentation" id="help-section" style="display: none" role="region" aria-labelledby="help-heading" aria-hidden="true">
+          <h4 id="help-heading">Quick Guide</h4>
           <ul>
             <li>
               <strong>TARO (Triples Add and Roll Over):</strong> When you roll
@@ -46,16 +46,16 @@
           </ul>
         </section>
 
-        <section class="character-info">
+        <section class="character-info" role="region" aria-labelledby="character-info-heading">
           <div class="section-header">
-            <h2>Character Information</h2>
+            <h2 id="character-info-heading">Character Information</h2>
             <div class="elaborations-toggle">
               <label class="toggle-switch">
-                <input type="checkbox" id="elaborations-toggle" />
+                <input type="checkbox" id="elaborations-toggle" role="switch" aria-label="Enable elaborations" aria-describedby="toggle-help" />
                 <span class="toggle-slider"></span>
               </label>
               <span class="toggle-label">Enable Elaborations</span>
-              <span class="info-icon" id="info-icon">ⓘ</span>
+              <span class="info-icon" id="info-icon" role="button" tabindex="0" aria-label="Toggle elaborations help" aria-expanded="false" aria-controls="toggle-help">ⓘ</span>
               <div class="toggle-help" id="toggle-help" style="display: none">
                 Enables optional rules including additional kindreds, character
                 types, and other expansions from the Elaborations section
@@ -65,12 +65,13 @@
           <div class="field name-field">
             <label for="name">Name:</label>
             <div class="input-group">
-              <input type="text" id="name" placeholder="Enter character name" />
+              <input type="text" id="name" placeholder="Enter character name" aria-label="Character name" aria-required="false" />
               <button
                 type="button"
                 id="generate-name"
                 class="btn btn-small"
                 title="Generate a random fantasy name"
+                aria-label="Generate random character name"
               >
                 Random
               </button>
@@ -83,7 +84,7 @@
                 title="Different kindreds have multiplicative attribute modifiers"
                 >Kindred:</label
               >
-              <select id="kindred">
+              <select id="kindred" aria-label="Character kindred (race)" aria-describedby="kindred-help">
                 <option value="">Select Kindred</option>
                 <option
                   value="human"
@@ -129,7 +130,7 @@
                 title="Your character's profession determines abilities and limitations"
                 >Type:</label
               >
-              <select id="class">
+              <select id="class" aria-label="Character type (class)" aria-describedby="class-help">
                 <option value="">Select Type</option>
                 <option
                   value="warrior"
@@ -159,7 +160,7 @@
             </div>
             <div class="field">
               <label for="gender">Gender:</label>
-              <select id="gender">
+              <select id="gender" aria-label="Character gender">
                 <option value="">Select Gender</option>
                 <option value="male">Male</option>
                 <option value="female">Female</option>
@@ -168,7 +169,7 @@
             </div>
             <div class="field">
               <label for="age">Age:</label>
-              <input type="number" id="age" min="1" max="999" />
+              <input type="number" id="age" min="1" max="999" aria-label="Character age in years" />
             </div>
             <div class="field">
               <label
@@ -176,17 +177,18 @@
                 title="Roll 3d6 on height/weight table or choose"
                 >Height:</label
               >
-              <input type="text" id="height" placeholder="e.g., 5'10&quot;" />
+              <input type="text" id="height" placeholder="e.g., 5'10&quot;" aria-label="Character height" aria-describedby="height-help" />
             </div>
             <div class="field">
               <label for="weight" title="Weight in pounds">Weight:</label>
               <div class="input-group">
-                <input type="text" id="weight" placeholder="e.g., 165 lbs" />
+                <input type="text" id="weight" placeholder="e.g., 165 lbs" aria-label="Character weight in pounds" />
                 <button
                   type="button"
                   id="roll-height-weight"
                   class="btn btn-small"
                   title="Roll 3d6 for height and weight"
+                  aria-label="Generate random height and weight"
                 >
                   Generate
                 </button>
@@ -194,13 +196,13 @@
             </div>
             <div class="field">
               <label for="hair" title="Hair color and style">Hair:</label>
-              <input type="text" id="hair" placeholder="e.g., Brown, long" />
+              <input type="text" id="hair" placeholder="e.g., Brown, long" aria-label="Hair color and style" />
             </div>
             <div class="field">
               <label for="level" title="Character experience level"
                 >Level:</label
               >
-              <input type="number" id="level" value="1" min="1" max="50" />
+              <input type="number" id="level" value="1" min="1" max="50" aria-label="Character experience level" />
             </div>
           </div>
           <div class="file-actions">
@@ -208,6 +210,7 @@
               id="export-character"
               class="btn btn-success"
               title="Save character to JSON file"
+              aria-label="Export character data as JSON file"
             >
               Export as JSON
             </button>
@@ -215,6 +218,7 @@
               id="export-pdf"
               class="btn btn-success"
               title="Export character sheet as PDF"
+              aria-label="Export character sheet as PDF document"
             >
               Export as PDF
             </button>
@@ -222,14 +226,15 @@
               id="import-character"
               class="btn btn-info"
               title="Load character from JSON file"
+              aria-label="Import character from JSON file"
             >
               Import Character
             </button>
           </div>
         </section>
 
-        <section class="attributes">
-          <h2>Attributes</h2>
+        <section class="attributes" role="region" aria-labelledby="attributes-heading">
+          <h2 id="attributes-heading">Attributes</h2>
           <div class="attributes-grid">
             <div class="attribute-header">Attribute</div>
             <div class="attribute-header">Current</div>
@@ -247,6 +252,7 @@
               class="attribute-input"
               min="1"
               max="999"
+              aria-label="Strength current value"
             />
             <input
               type="number"
@@ -254,6 +260,7 @@
               class="attribute-input"
               min="1"
               max="999"
+              aria-label="Strength maximum value"
             />
 
             <div
@@ -268,6 +275,7 @@
               class="attribute-input"
               min="1"
               max="999"
+              aria-label="Constitution current value"
             />
             <input
               type="number"
@@ -275,6 +283,7 @@
               class="attribute-input"
               min="1"
               max="999"
+              aria-label="Constitution maximum value"
             />
 
             <div
@@ -289,6 +298,7 @@
               class="attribute-input"
               min="1"
               max="999"
+              aria-label="Dexterity current value"
             />
             <input
               type="number"
@@ -296,6 +306,7 @@
               class="attribute-input"
               min="1"
               max="999"
+              aria-label="Dexterity maximum value"
             />
 
             <div
@@ -310,6 +321,7 @@
               class="attribute-input"
               min="1"
               max="999"
+              aria-label="Speed current value"
             />
             <input
               type="number"
@@ -317,6 +329,7 @@
               class="attribute-input"
               min="1"
               max="999"
+              aria-label="Speed maximum value"
             />
 
             <div
@@ -331,6 +344,7 @@
               class="attribute-input"
               min="1"
               max="999"
+              aria-label="Luck current value"
             />
             <input
               type="number"
@@ -338,6 +352,7 @@
               class="attribute-input"
               min="1"
               max="999"
+              aria-label="Luck maximum value"
             />
 
             <div
@@ -352,6 +367,7 @@
               class="attribute-input"
               min="1"
               max="999"
+              aria-label="Intelligence current value"
             />
             <input
               type="number"
@@ -359,6 +375,7 @@
               class="attribute-input"
               min="1"
               max="999"
+              aria-label="Intelligence maximum value"
             />
 
             <div
@@ -373,6 +390,7 @@
               class="attribute-input"
               min="1"
               max="999"
+              aria-label="Wizardry current value"
             />
             <input
               type="number"
@@ -380,6 +398,7 @@
               class="attribute-input"
               min="1"
               max="999"
+              aria-label="Wizardry maximum value"
             />
 
             <div
@@ -394,6 +413,7 @@
               class="attribute-input"
               min="1"
               max="999"
+              aria-label="Charisma current value"
             />
             <input
               type="number"
@@ -401,6 +421,7 @@
               class="attribute-input"
               min="1"
               max="999"
+              aria-label="Charisma maximum value"
             />
           </div>
 
@@ -420,12 +441,13 @@
           </div>
         </section>
 
-        <section class="actions">
+        <section class="actions" role="region" aria-label="Dice rolling actions">
           <div class="action-buttons">
             <button
               id="roll-attributes"
               class="btn btn-primary"
               title="Roll 3d6 for each attribute with TARO for triples"
+              aria-label="Roll new random attributes using 3d6"
             >
               Roll New Attributes
             </button>
@@ -433,14 +455,15 @@
               id="reroll-attributes"
               class="btn btn-secondary"
               title="Reroll all attributes and apply kindred modifiers"
+              aria-label="Reroll all attributes with kindred modifiers"
             >
               Reroll All
             </button>
           </div>
         </section>
 
-        <section class="abilities" id="abilities-section">
-          <h2>Character Abilities</h2>
+        <section class="abilities" id="abilities-section" role="region" aria-labelledby="abilities-heading">
+          <h2 id="abilities-heading">Character Abilities</h2>
           <div class="info-box">
             <h4>Type & Kindred Abilities</h4>
             <ul id="abilities-list">
@@ -451,8 +474,8 @@
           </div>
         </section>
 
-        <section class="talents">
-          <h2>Talents</h2>
+        <section class="talents" role="region" aria-labelledby="talents-heading">
+          <h2 id="talents-heading">Talents</h2>
           <div class="info-box">
             <h4>Talent Rules</h4>
             <ul>
@@ -480,14 +503,16 @@
               <select
                 id="new-talent"
                 title="Choose a talent that reflects your character's background and skills"
+                aria-label="Select a talent to add"
               >
                 <option value="">Select a talent</option>
               </select>
-              <button id="add-talent" class="btn btn-small">Add Talent</button>
+              <button id="add-talent" class="btn btn-small" aria-label="Add selected talent to character">Add Talent</button>
               <button
                 id="random-talent"
                 class="btn btn-small"
                 title="Get a random talent"
+                aria-label="Add random talent to character"
               >
                 Random
               </button>
@@ -496,8 +521,8 @@
           </div>
         </section>
 
-        <section class="equipment">
-          <h2>Equipment</h2>
+        <section class="equipment" role="region" aria-labelledby="equipment-heading">
+          <h2 id="equipment-heading">Equipment</h2>
           <div class="equipment-grid">
             <div class="equipment-section">
               <h3>Weapons</h3>
@@ -509,10 +534,13 @@
                     placeholder="Weapon name"
                     title="Warriors get +1d6 per level with melee weapons"
                     autocomplete="off"
+                    aria-label="Enter weapon name"
+                    aria-autocomplete="list"
+                    aria-controls="weapon-typeahead"
                   />
                   <div id="weapon-typeahead" class="typeahead-dropdown"></div>
                 </div>
-                <button id="add-weapon" class="btn btn-small">Add</button>
+                <button id="add-weapon" class="btn btn-small" aria-label="Add weapon to equipment list">Add</button>
               </div>
               <div id="weapons-list" class="equipment-list"></div>
             </div>
@@ -527,10 +555,13 @@
                     placeholder="Armor name"
                     title="Warriors can double armor protection at cost of durability"
                     autocomplete="off"
+                    aria-label="Enter armor name"
+                    aria-autocomplete="list"
+                    aria-controls="armor-typeahead"
                   />
                   <div id="armor-typeahead" class="typeahead-dropdown"></div>
                 </div>
-                <button id="add-armor" class="btn btn-small">Add</button>
+                <button id="add-armor" class="btn btn-small" aria-label="Add armor to equipment list">Add</button>
               </div>
               <div id="armor-list" class="equipment-list"></div>
             </div>
@@ -543,8 +574,9 @@
                   id="new-item"
                   placeholder="Item name"
                   autocomplete="off"
+                  aria-label="Enter item name"
                 />
-                <button id="add-item" class="btn btn-small">Add</button>
+                <button id="add-item" class="btn btn-small" aria-label="Add item to equipment list">Add</button>
               </div>
               <div id="items-list" class="equipment-list"></div>
             </div>
@@ -558,7 +590,7 @@
                 title="Starting gold = 3d6 × 10 (or kindred specific)"
                 >Gold:</label
               >
-              <input type="number" id="gold" min="0" value="0" />
+              <input type="number" id="gold" min="0" value="0" aria-label="Gold pieces" />
             </div>
           </div>
 
@@ -595,13 +627,13 @@
       </main>
 
       <!-- Help Button -->
-      <button class="help-button" onclick="toggleHelp()" title="Show/Hide Help">
+      <button class="help-button" onclick="toggleHelp()" title="Show/Hide Help" aria-label="Toggle help section" aria-controls="help-section" aria-expanded="false">
         ?
       </button>
     </div>
 
     <!-- Footer with Copyright -->
-    <footer class="copyright-footer">
+    <footer class="copyright-footer" role="contentinfo" aria-label="Copyright and legal information">
       <p>
         Tunnels & Trolls™ and Deluxe Tunnels & Trolls™ are trademarks of Flying
         Buffalo Inc.
@@ -631,8 +663,12 @@
     <script>
       function toggleHelp() {
         const helpSection = document.getElementById("help-section");
-        helpSection.style.display =
-          helpSection.style.display === "none" ? "block" : "none";
+        const helpButton = document.querySelector('.help-button');
+        const isVisible = helpSection.style.display !== "none";
+        
+        helpSection.style.display = isVisible ? "none" : "block";
+        helpSection.setAttribute('aria-hidden', isVisible ? 'true' : 'false');
+        helpButton.setAttribute('aria-expanded', !isVisible);
       }
     </script>
     <script src="dice.js"></script>

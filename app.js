@@ -8,6 +8,7 @@ class TTCharacterGenerator {
         this.populateTalentDropdown();
         this.bindEvents();
         this.updateUI();
+        this.setupAriaLive();
     }
     
     initializeFantasyNameData() {
@@ -55,6 +56,31 @@ class TTCharacterGenerator {
             17: { height: "6'10\"", weightMin: 240, weightMax: 280 },
             18: { height: "7'1\"", weightMin: 255, weightMax: 300 }
         };
+    }
+    
+    setupAriaLive() {
+        // Create aria-live region for announcements
+        const liveRegion = document.createElement('div');
+        liveRegion.id = 'aria-live-region';
+        liveRegion.setAttribute('aria-live', 'polite');
+        liveRegion.setAttribute('aria-atomic', 'true');
+        liveRegion.style.position = 'absolute';
+        liveRegion.style.left = '-10000px';
+        liveRegion.style.width = '1px';
+        liveRegion.style.height = '1px';
+        liveRegion.style.overflow = 'hidden';
+        document.body.appendChild(liveRegion);
+        this.liveRegion = liveRegion;
+    }
+    
+    announceToScreenReader(message) {
+        if (this.liveRegion) {
+            this.liveRegion.textContent = message;
+            // Clear after announcement
+            setTimeout(() => {
+                this.liveRegion.textContent = '';
+            }, 1000);
+        }
     }
     
     initializeElements() {
@@ -299,10 +325,35 @@ class TTCharacterGenerator {
         if (infoIcon && helpText) {
             infoIcon.addEventListener('mouseenter', () => {
                 helpText.style.display = 'block';
+                helpText.setAttribute('aria-hidden', 'false');
+                infoIcon.setAttribute('aria-expanded', 'true');
             });
             
             infoIcon.addEventListener('mouseleave', () => {
                 helpText.style.display = 'none';
+                helpText.setAttribute('aria-hidden', 'true');
+                infoIcon.setAttribute('aria-expanded', 'false');
+            });
+            
+            // Keyboard support for info icon
+            infoIcon.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    const isVisible = helpText.style.display !== 'none';
+                    helpText.style.display = isVisible ? 'none' : 'block';
+                    helpText.setAttribute('aria-hidden', isVisible ? 'true' : 'false');
+                    infoIcon.setAttribute('aria-expanded', !isVisible);
+                }
+            });
+            
+            // Close help text when pressing Escape
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && helpText.style.display !== 'none') {
+                    helpText.style.display = 'none';
+                    helpText.setAttribute('aria-hidden', 'true');
+                    infoIcon.setAttribute('aria-expanded', 'false');
+                    infoIcon.focus();
+                }
             });
         }
     }
@@ -358,6 +409,7 @@ class TTCharacterGenerator {
                     message = 'No available rogue-like talents. Rogues can only select rogue-like talents (marked with *) on even levels.';
                 }
                 alert(message);
+                this.announceToScreenReader(message);
                 return;
             }
             
@@ -406,6 +458,7 @@ class TTCharacterGenerator {
                     message = 'No available rogue-like talents to add. Rogues can only select rogue-like talents (marked with *) on even levels.';
                 }
                 alert(message);
+                this.announceToScreenReader(message);
                 return;
             }
             
@@ -451,6 +504,7 @@ class TTCharacterGenerator {
         
         if (!result) {
             alert('Invalid roll result');
+            this.announceToScreenReader('Invalid roll result');
             return;
         }
         
@@ -506,6 +560,7 @@ class TTCharacterGenerator {
         message += `Set to: ${weight} lbs`;
         
         alert(message);
+        this.announceToScreenReader(`Height: ${height}, Weight: ${weight} lbs`);
     }
     
     rollNewCharacter() {
@@ -547,6 +602,7 @@ class TTCharacterGenerator {
             }
             
             alert(message);
+            this.announceToScreenReader(`TARO! You are now a ${specialistType || 'Specialist'}`);
         }
         
         setTimeout(() => {
@@ -589,6 +645,7 @@ class TTCharacterGenerator {
             }
             
             alert(message);
+            this.announceToScreenReader(`TARO! You are now a ${specialistType || 'Specialist'}`);
         }
         
         this.character.applyKindredModifiers();
@@ -893,7 +950,9 @@ class TTCharacterGenerator {
         // Check if at max talents
         const maxTalents = this.character.getMaxTalents();
         if (this.character.talents.length >= maxTalents) {
-            alert(`Cannot add more talents. Maximum allowed: ${maxTalents} (based on level ${this.character.level} as ${this.character.characterClass || 'no type'})`);
+            const msg = `Cannot add more talents. Maximum allowed: ${maxTalents} (based on level ${this.character.level} as ${this.character.characterClass || 'no type'})`;
+            alert(msg);
+            this.announceToScreenReader(msg);
             return;
         }
         
@@ -972,11 +1031,14 @@ class TTCharacterGenerator {
                         if (this.character.importCharacter(characterData)) {
                             this.updateUI();
                             alert('Character imported successfully!');
+                            this.announceToScreenReader('Character imported successfully');
                         } else {
                             alert('Failed to import character. Please check the file format.');
+                            this.announceToScreenReader('Failed to import character');
                         }
                     } catch (error) {
                         alert('Invalid JSON file. Please select a valid character file.');
+                        this.announceToScreenReader('Invalid JSON file');
                     }
                 };
                 reader.readAsText(file);
@@ -1547,6 +1609,7 @@ class TTCharacterGenerator {
         const errors = this.character.validateCharacter();
         if (errors.length > 0) {
             alert('Character validation errors:\n' + errors.join('\n'));
+            this.announceToScreenReader('Character validation errors. Please check the form.');
             return false;
         }
         return true;
