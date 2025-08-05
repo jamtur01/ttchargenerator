@@ -349,7 +349,7 @@ class Character {
                 description: 'Magic users with spell training and magical proficiency',
                 summary: 'Knows all 1st level spells, limited to 2d6 weapons',
                 equipmentDescription: 'Magic users with essential spell components',
-                requirements: { iq: 10, dex: 10 },
+                requirements: { iq: 10, dex: 10 }, // Minimum to learn and cast first-level spells
                 equipment: ['Staff', 'Spellbook', 'Robes'],
                 startingTalents: 1,
                 knowsAllFirstLevelSpells: true,
@@ -399,8 +399,8 @@ class Character {
                 summary: 'Combined warrior and wizard abilities',
                 equipmentDescription: 'Elite gear befitting a legendary hero',
                 requirements: {
-                    str: 12, con: 12, dex: 12, spd: 12,
-                    lk: 12, iq: 12, wiz: 12, cha: 12
+                    // Must have IQ, LK, DEX, and WIZ all 12+
+                    iq: 12, lk: 12, dex: 12, wiz: 12
                 },
                 equipment: ['Varies'],
                 startingTalents: 1,

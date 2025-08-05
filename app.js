@@ -793,7 +793,7 @@ class TTCharacterGenerator {
                 } else if (cls.value === 'wizard' &&
                           (this.character.attributes.iq.current < 10 ||
                            this.character.attributes.dex.current < 10)) {
-                    option.title = 'Wizard requires IQ 10+ and DEX 10+';
+                    option.title = 'Wizard requires IQ 10+ and DEX 10+ to learn and cast spells';
                 }
             }
             
@@ -820,7 +820,7 @@ class TTCharacterGenerator {
                     if (cls.value === 'citizen' && this.character.hasTriples) {
                         option.title = 'Cannot select Citizen when triples were rolled';
                     } else if (cls.value === 'paragon') {
-                        option.title = 'Paragon requires 12+ in at least 6 of 8 attributes';
+                        option.title = 'Paragon requires IQ, LK, DEX, and WIZ all 12+, plus 12+ in at least 6 of 8 attributes total';
                     }
                 }
                 

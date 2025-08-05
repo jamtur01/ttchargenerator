@@ -117,7 +117,25 @@ class PDFGenerator {
         // Prepare equipment data
         const weapons = this.prepareWeapons(character.equipment.weapons);
         const armor = this.prepareArmor(character.equipment.armor);
-        const equipment = [...armor, ...character.equipment.items];
+        // Handle items which can be strings or objects
+        const items = character.equipment.items.map(item => {
+            if (typeof item === 'string') {
+                return item;
+            } else if (typeof item === 'object' && item.name) {
+                // If it's an object with data, show the name and key properties
+                const itemData = item.data;
+                if (itemData) {
+                    let itemStr = item.name;
+                    if (itemData.weight) {
+                        itemStr += ` (${itemData.weight} units)`;
+                    }
+                    return itemStr;
+                }
+                return item.name;
+            }
+            return ''; // Fallback for malformed items
+        }).filter(item => item); // Remove empty strings
+        const equipment = [...armor, ...items];
         
         // Calculate weights
         const weightPossible = Math.floor(character.attributes.str.current * 100);
