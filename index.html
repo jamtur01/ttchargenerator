@@ -86,42 +86,6 @@
               >
               <select id="kindred" aria-label="Character kindred (race)" aria-describedby="kindred-help">
                 <option value="">Select Kindred</option>
-                <option
-                  value="human"
-                  title="1× all attributes, second chance on failed saving rolls"
-                >
-                  Human
-                </option>
-                <option
-                  value="dwarf"
-                  title="2× STR & CON, 0.75× LK, 0.67× height, 2× weight"
-                >
-                  Dwarf
-                </option>
-                <option
-                  value="elf"
-                  title="0.67× CON, 1.33× DEX, 1.5× IQ/WIZ/CHA, 1.10× height"
-                >
-                  Elf
-                </option>
-                <option
-                  value="hobb"
-                  title="0.5× STR, 2× CON, 1.5× DEX/LK, 0.5× height, 0.75× weight"
-                >
-                  Hobb
-                </option>
-                <option
-                  value="fairy"
-                  title="0.25× STR/CON, 1.75× DEX, 1.5× LK/CHA, 2× WIZ, 0.10× height, 0.01× weight"
-                >
-                  Fairy
-                </option>
-                <option
-                  value="leprechaun"
-                  title="0.33× STR, 0.67× CON, 1.5× DEX/LK/WIZ, 1.25× IQ, 0.33× height, 0.10× weight"
-                >
-                  Leprechaun
-                </option>
               </select>
             </div>
             <div class="field">
@@ -132,30 +96,6 @@
               >
               <select id="class" aria-label="Character type (class)" aria-describedby="class-help">
                 <option value="">Select Type</option>
-                <option
-                  value="warrior"
-                  title="Weapon/armor bonuses, no magic ability"
-                >
-                  Warrior
-                </option>
-                <option
-                  value="rogue"
-                  title="Can use weapons and magic, starts with 2 talents"
-                >
-                  Rogue
-                </option>
-                <option
-                  value="wizard"
-                  title="Knows all 1st level spells, limited to 2d6 weapons"
-                >
-                  Wizard
-                </option>
-                <option
-                  value="specialist"
-                  title="Must roll triples on an attribute, has exceptional abilities"
-                >
-                  Specialist
-                </option>
               </select>
             </div>
             <div class="field">
@@ -596,27 +536,8 @@
 
           <div class="info-box">
             <h4>Starting Equipment by Type</h4>
-            <ul>
-              <li>
-                <strong>Warriors:</strong> Sword, Shield, Leather Armor -
-                Skilled fighters equipped for combat
-              </li>
-              <li>
-                <strong>Rogues:</strong> Dagger, Lockpicks, Leather Armor -
-                Versatile adventurers ready for stealth
-              </li>
-              <li>
-                <strong>Wizards:</strong> Staff, Spellbook, Robes - Magic users
-                with essential spell components
-              </li>
-              <li>
-                <strong>Specialists:</strong> Varies by specialization -
-                Equipment depends on their unique abilities
-              </li>
-              <li>
-                <strong>Starting Gold:</strong> 3d6 × 10 gold pieces - Rolled
-                automatically with attributes
-              </li>
+            <ul id="starting-equipment-list">
+              <!-- Dynamically populated -->
             </ul>
             <p class="equipment-note">
               Additional equipment can be purchased with starting gold or
@@ -674,6 +595,7 @@
     <script src="dice.js"></script>
     <script src="equipment-data.js"></script>
     <script src="character.js"></script>
+    <script src="pdf-generator.js"></script>
     <script src="app.js"></script>
   </body>
   <script type="text/javascript">

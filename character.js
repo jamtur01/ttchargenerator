@@ -31,7 +31,7 @@ class Character {
         this.gold = 0;
         this.hasTriples = false;
         
-        // Corrected kindred data with multiplicative modifiers
+        // Unified kindred data with isElaborate flag for filtering
         this.kindredData = {
             human: {
                 name: 'Human',
@@ -43,7 +43,7 @@ class Character {
                 weightMod: 1
             },
             dwarf: {
-                name: 'Dwarf (Gristlegrim)',
+                name: 'Dwarf',
                 description: 'Short, sturdy, and strong',
                 modifiers: {
                     str: 2, con: 2, dex: 1, spd: 1, lk: 0.75, iq: 1, wiz: 1, cha: 1
@@ -86,239 +86,238 @@ class Character {
                 },
                 heightMod: 0.33,
                 weightMod: 0.10
-            }
-        };
-        
-        // Elaborate kindreds from the Peters-McAllister Chart 2.0
-        this.elaborateKindredData = {
-            // Familiar Illkin
+            },
+            // Elaborate kindreds from the Peters-McAllister Chart 2.0
             centaur: {
                 name: 'Centaur',
-                description: 'Half-human, half-horse beings',
+                description: 'Strong and wise, half-human half-horse',
                 modifiers: {
                     str: 3, con: 3, dex: 1, spd: 1, lk: 1, iq: 0.5, wiz: 2, cha: 1.5
                 },
                 heightMod: 1.50,
                 weightMod: 8,
-                elaborate: true
+                isElaborate: true
             },
             dakk: {
                 name: 'Dakk',
-                description: 'Shadow-touched humanoids',
+                description: 'Dark, sturdy shadow-dwellers',
                 modifiers: {
                     str: 2, con: 2, dex: 1, spd: 1, lk: 0.8, iq: 1.1, wiz: 1.1, cha: 0.75
                 },
                 heightMod: 0.67,
                 weightMod: 0.8,
-                elaborate: true
+                isElaborate: true
             },
             gnome: {
                 name: 'Gnome',
-                description: 'Small earth-dwelling folk',
+                description: 'Tiny, clever, and intelligent',
                 modifiers: {
                     str: 0.33, con: 0.5, dex: 1.5, spd: 1, lk: 1.5, iq: 2, wiz: 1, cha: 0.67
                 },
                 heightMod: 0.33,
                 weightMod: 0.33,
-                elaborate: true
+                isElaborate: true
             },
             goblin: {
                 name: 'Goblin',
-                description: 'Small, mischievous humanoids',
+                description: 'Small, quick, and unpopular',
                 modifiers: {
                     str: 0.75, con: 0.75, dex: 1.5, spd: 1, lk: 1, iq: 1, wiz: 0.75, cha: 0.5
                 },
                 heightMod: 0.50,
                 weightMod: 0.50,
-                elaborate: true
+                isElaborate: true
             },
             gremlin: {
                 name: 'Gremlin',
-                description: 'Tiny mechanical mischief-makers',
+                description: 'Tiny, clever mischief-makers',
                 modifiers: {
                     str: 0.5, con: 0.5, dex: 1, spd: 1, lk: 1.5, iq: 1.5, wiz: 1.5, cha: 0.5
                 },
                 heightMod: 0.33,
                 weightMod: 0.33,
-                elaborate: true
+                isElaborate: true
             },
             halfElf: {
                 name: 'Half-Elf',
-                description: 'Mixed heritage of human and elf',
+                description: 'Balanced mix of human and elf',
                 modifiers: {
                     str: 1, con: 1, dex: 1.25, spd: 1, lk: 1, iq: 1.25, wiz: 1.25, cha: 1.25
                 },
                 heightMod: 1.05,
                 weightMod: 1,
-                elaborate: true
+                isElaborate: true
             },
             dwelf: {
                 name: 'Dwelf',
-                description: 'Mixed heritage of dwarf and elf',
+                description: 'Strong yet graceful half-breed',
                 modifiers: {
                     str: 1.5, con: 1.25, dex: 1, spd: 1, lk: 0.75, iq: 0.9, wiz: 1, cha: 1.25
                 },
                 heightMod: 0.85,
                 weightMod: 1.50,
-                elaborate: true
+                isElaborate: true
             },
             hobgoblin: {
                 name: 'Hobgoblin',
-                description: 'Larger, more civilized goblins',
+                description: 'Larger, nimble goblin cousins',
                 modifiers: {
                     str: 1, con: 1, dex: 1.5, spd: 1, lk: 0.5, iq: 0.75, wiz: 1, cha: 0.75
                 },
                 heightMod: 1,
                 weightMod: 1.50,
-                elaborate: true
+                isElaborate: true
             },
             kobold: {
                 name: 'Kobold',
-                description: 'Small draconic humanoids',
+                description: 'Small, clever dragon-kin',
                 modifiers: {
                     str: 0.5, con: 0.5, dex: 1.5, spd: 1, lk: 1, iq: 2, wiz: 1, cha: 0.75
                 },
                 heightMod: 0.50,
                 weightMod: 0.50,
-                elaborate: true
+                isElaborate: true
             },
             selkie: {
                 name: 'Selkie',
-                description: 'Seal-folk who can take human form',
+                description: 'Seal-folk shapeshifters',
                 modifiers: {
                     str: 1, con: 1, dex: 1, spd: 1, lk: 1, iq: 1, wiz: 1, cha: 0.9
                 },
                 heightMod: 0.90,
                 weightMod: 0.90,
-                elaborate: true
+                isElaborate: true
             },
             pixie: {
                 name: 'Pixie',
-                description: 'Tiny winged folk',
+                description: 'Tiny, charismatic winged folk',
                 modifiers: {
                     str: 0.25, con: 0.33, dex: 1.25, spd: 1, lk: 1, iq: 1, wiz: 1, cha: 1.5
                 },
                 heightMod: 0.10,
                 weightMod: 0.01,
-                elaborate: true
+                isElaborate: true
             },
             redcap: {
                 name: 'Redcap',
-                description: 'Murderous fairy folk',
+                description: 'Small, vicious fairy warriors',
                 modifiers: {
                     str: 0.5, con: 0.67, dex: 1.5, spd: 1, lk: 1.5, iq: 1.25, wiz: 1.25, cha: 0.75
                 },
                 heightMod: 0.33,
                 weightMod: 0.10,
-                elaborate: true
+                isElaborate: true
             },
             livingSkeleton: {
                 name: 'Living Skeleton',
-                description: 'Humanoid with transparent flesh',
+                description: 'Hardy transparent-fleshed beings',
                 modifiers: {
                     str: 1, con: 1.5, dex: 1, spd: 1, lk: 1, iq: 1, wiz: 1, cha: 1
                 },
                 heightMod: 1,
                 weightMod: 0.50,
-                elaborate: true
+                isElaborate: true
             },
             uruk: {
                 name: 'Uruk (Orc)',
-                description: 'Brutish warrior folk',
+                description: 'Strong, tough warrior race',
                 modifiers: {
                     str: 1.1, con: 1.1, dex: 1, spd: 1, lk: 0.67, iq: 0.75, wiz: 1, cha: 1.1
                 },
                 heightMod: 1,
                 weightMod: 1,
-                elaborate: true
+                isElaborate: true
             },
             vampire: {
                 name: 'Vampire',
-                description: 'Undead blood drinkers',
+                description: 'Powerful undead night-stalkers',
                 modifiers: {
                     str: 2.5, con: 1, dex: 1, spd: 1, lk: 1, iq: 1.5, wiz: 1.5, cha: 1.1
                 },
                 heightMod: 1,
                 weightMod: 1,
-                elaborate: true
+                isElaborate: true
             },
             varta: {
                 name: 'Varta',
-                description: 'Enigmatic shapeshifters',
+                description: 'Lucky mysterious shapeshifters',
                 modifiers: {
                     str: 1, con: 1, dex: 0.75, spd: 1, lk: 1.33, iq: 1, wiz: 1.1, cha: 1
                 },
                 heightMod: 1,
                 weightMod: 1,
-                elaborate: true
+                isElaborate: true
             },
             werewolf: {
                 name: 'Werewolf',
-                description: 'Lycanthrope shapeshifters',
+                description: 'Strong, tough lycanthropes',
                 modifiers: {
                     str: 2, con: 3, dex: 1, spd: 1, lk: 1, iq: 1, wiz: 1, cha: 1.1
                 },
                 heightMod: 1.10,
                 weightMod: 1.25,
-                elaborate: true
+                isElaborate: true
             },
             // Less Common Illkin
             harpy: {
                 name: 'Harpy',
-                description: 'Winged humanoids',
+                description: 'Strong but unlucky bird-folk',
                 modifiers: {
                     str: 1.5, con: 1.5, dex: 1, spd: 1, lk: 0.5, iq: 0.67, wiz: 0.75, cha: 0.5
                 },
                 heightMod: 1,
                 weightMod: 0.75,
-                elaborate: true
+                isElaborate: true
             },
             ogre: {
                 name: 'Hrogr (Ogre)',
-                description: 'Large brutish humanoids',
+                description: 'Huge, powerful but dim',
                 modifiers: {
                     str: 3, con: 4, dex: 0.75, spd: 1, lk: 0.5, iq: 0.5, wiz: 0.5, cha: 1
                 },
                 heightMod: 1.50,
                 weightMod: 3,
-                elaborate: true
+                isElaborate: true
             },
             minotaur: {
                 name: 'Minotaur',
-                description: 'Bull-headed humanoids',
+                description: 'Strong bull-headed warriors',
                 modifiers: {
                     str: 2.5, con: 2.5, dex: 0.75, spd: 1, lk: 1, iq: 0.67, wiz: 1, cha: 2
                 },
                 heightMod: 1.25,
                 weightMod: 2.50,
-                elaborate: true
+                isElaborate: true
             },
             ratling: {
                 name: 'Ratling',
-                description: 'Rat-like humanoids',
+                description: 'Small, agile rat-folk',
                 modifiers: {
                     str: 0.5, con: 1, dex: 1.5, spd: 1, lk: 1.5, iq: 1, wiz: 0.9, cha: 0.8
                 },
                 heightMod: 0.50,
                 weightMod: 0.33,
-                elaborate: true
+                isElaborate: true
             },
             troll: {
                 name: 'Forest Troll',
-                description: 'Regenerating forest dwellers',
+                description: 'Large, strong regenerators',
                 modifiers: {
                     str: 2.5, con: 2.5, dex: 1, spd: 1, lk: 1, iq: 0.75, wiz: 1, cha: 1
                 },
                 heightMod: 1.50,
                 weightMod: 4,
-                elaborate: true
+                isElaborate: true
             }
         };
         
+        // Unified class data with isElaborate flag for filtering
         this.classData = {
             warrior: {
                 name: 'Warrior',
                 description: 'Skilled fighters with weapon/armor bonuses but no innate magical ability',
+                summary: 'Weapon/armor bonuses, no magic ability',
+                equipmentDescription: 'Skilled fighters equipped for combat',
                 requirements: {},
                 equipment: ['Sword', 'Shield', 'Leather Armor'],
                 startingTalents: 1,
@@ -331,6 +330,8 @@ class Character {
             rogue: {
                 name: 'Rogue',
                 description: 'Adaptable characters who can use both magic and weapons',
+                summary: 'Can use weapons and magic, starts with 2 talents',
+                equipmentDescription: 'Versatile adventurers ready for stealth',
                 requirements: {},
                 equipment: ['Dagger', 'Lockpicks', 'Leather Armor'],
                 startingTalents: 2,
@@ -346,6 +347,8 @@ class Character {
             wizard: {
                 name: 'Wizard',
                 description: 'Magic users with spell training and magical proficiency',
+                summary: 'Knows all 1st level spells, limited to 2d6 weapons',
+                equipmentDescription: 'Magic users with essential spell components',
                 requirements: { iq: 10, dex: 10 },
                 equipment: ['Staff', 'Spellbook', 'Robes'],
                 startingTalents: 1,
@@ -361,6 +364,8 @@ class Character {
             specialist: {
                 name: 'Specialist',
                 description: 'Characters born with extraordinary abilities',
+                summary: 'Must roll triples on an attribute, has exceptional abilities',
+                equipmentDescription: 'Equipment depends on their unique abilities',
                 requirements: {},
                 equipment: ['Varies by specialization'],
                 startingTalents: 1,
@@ -370,14 +375,13 @@ class Character {
                     'Special ability based on which attribute(s) had triples',
                     'Doubles saving roll totals for specialist attribute'
                 ]
-            }
-        };
-        
-        // Elaborate character types
-        this.elaborateClassData = {
+            },
+            // Elaborate character types
             citizen: {
                 name: 'Citizen',
                 description: 'Average folk with no special combat or magical training',
+                summary: 'Average folk with no special training',
+                equipmentDescription: 'Basic equipment for everyday life',
                 requirements: {},
                 equipment: ['Varies by profession'],
                 startingTalents: 1,
@@ -392,6 +396,8 @@ class Character {
             paragon: {
                 name: 'Paragon',
                 description: 'The most blessed of character types, combining warrior and wizard abilities',
+                summary: 'Combined warrior and wizard abilities',
+                equipmentDescription: 'Elite gear befitting a legendary hero',
                 requirements: {
                     str: 12, con: 12, dex: 12, spd: 12,
                     lk: 12, iq: 12, wiz: 12, cha: 12
@@ -510,8 +516,7 @@ class Character {
     applyKindredModifiers() {
         if (!this.kindred) return;
         
-        // Check both regular and elaborate kindred data
-        let kindredInfo = this.kindredData[this.kindred] || this.elaborateKindredData[this.kindred];
+        let kindredInfo = this.kindredData[this.kindred];
         if (!kindredInfo) return;
         
         const modifiers = kindredInfo.modifiers;
@@ -547,8 +552,7 @@ class Character {
         const previousClass = this.characterClass;
         this.characterClass = characterClass;
         
-        // Check both regular and elaborate class data
-        const classInfo = this.classData[characterClass] || this.elaborateClassData[characterClass];
+        const classInfo = this.classData[characterClass];
         if (classInfo) {
             
             // Clear existing equipment
@@ -617,12 +621,8 @@ class Character {
     adjustTalentsForClassChange() {
         const maxTalents = this.getMaxTalents();
         
-        // If character has more talents than allowed, remove excess
         while (this.talents.length > maxTalents) {
-            // Remove rogue talents first, then others
             let removed = false;
-            
-            // Try to remove a rogue talent first
             for (let i = this.talents.length - 1; i >= 0; i--) {
                 if (this.rogueTalents.includes(this.talents[i])) {
                     this.talents.splice(i, 1);
@@ -631,7 +631,6 @@ class Character {
                 }
             }
             
-            // If no rogue talent to remove, remove the last talent
             if (!removed && this.talents.length > 0) {
                 this.talents.pop();
             }
@@ -639,8 +638,7 @@ class Character {
     }
     
     canSelectClass(characterClass) {
-        // Check both regular and elaborate class data
-        const classInfo = this.classData[characterClass] || this.elaborateClassData[characterClass];
+        const classInfo = this.classData[characterClass];
         if (!classInfo) return false;
         
         // Specialist can only be selected if player rolled triples
@@ -677,14 +675,20 @@ class Character {
     }
     
     getAvailableClasses(includeElaborate = false) {
-        const basicClasses = Object.keys(this.classData).filter(cls => this.canSelectClass(cls));
-        
-        if (includeElaborate) {
-            const elaborateClasses = Object.keys(this.elaborateClassData).filter(cls => this.canSelectClass(cls));
-            return [...basicClasses, ...elaborateClasses];
-        }
-        
-        return basicClasses;
+        return Object.keys(this.classData).filter(cls => {
+            const classInfo = this.classData[cls];
+            // Include if it's not elaborate, or if elaborate is enabled and it is elaborate
+            const shouldInclude = !classInfo.isElaborate || (includeElaborate && classInfo.isElaborate);
+            return shouldInclude && this.canSelectClass(cls);
+        });
+    }
+    
+    getAvailableKindreds(includeElaborate = false) {
+        return Object.keys(this.kindredData).filter(kindred => {
+            const kindredInfo = this.kindredData[kindred];
+            // Include if it's not elaborate, or if elaborate is enabled and it is elaborate
+            return !kindredInfo.isElaborate || (includeElaborate && kindredInfo.isElaborate);
+        });
     }
     
     calculateModifier(attributeValue) {
@@ -869,10 +873,6 @@ class Character {
     validateCharacter() {
         const errors = [];
         
-        if (!this.name.trim()) {
-            errors.push('Character name is required');
-        }
-        
         if (!this.kindred) {
             errors.push('Kindred selection is required');
         }
@@ -900,8 +900,8 @@ class Character {
     getAbilities() {
         const abilities = [];
         
-        // Add class abilities (check both regular and elaborate)
-        const classInfo = this.classData[this.characterClass] || this.elaborateClassData[this.characterClass];
+        // Add class abilities
+        const classInfo = this.classData[this.characterClass];
         if (this.characterClass && classInfo) {
             const classAbilities = classInfo.abilities || [];
             abilities.push(...classAbilities);

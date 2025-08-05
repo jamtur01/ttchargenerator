@@ -1,6 +1,7 @@
 class TTCharacterGenerator {
     constructor() {
         this.character = new Character();
+        this.pdfGenerator = new PDFGenerator();
         this.elaborationsEnabled = false;
         this.initializeFantasyNameData();
         this.initializeHeightWeightTable();
@@ -8,6 +9,7 @@ class TTCharacterGenerator {
         this.populateTalentDropdown();
         this.bindEvents();
         this.updateUI();
+        this.updateStartingEquipmentInfo();
         this.setupAriaLive();
     }
     
@@ -182,7 +184,7 @@ class TTCharacterGenerator {
             this.character.setClass(e.target.value);
             this.updateUI();
             this.updateAbilities();
-            this.updateTalentsList(); // Update talents list after class change
+            this.updateTalentsList();
         });
         
         this.elements.gender.addEventListener('change', (e) => {
@@ -207,7 +209,6 @@ class TTCharacterGenerator {
         
         this.elements.level.addEventListener('input', (e) => {
             this.character.level = parseInt(e.target.value) || 1;
-            // Adjust talents if needed when level changes
             this.character.adjustTalentsForClassChange();
             this.updateTalentsList();
         });
@@ -316,6 +317,7 @@ class TTCharacterGenerator {
                 this.elaborationsEnabled = e.target.checked;
                 this.updateKindredOptions();
                 this.updateClassOptions();
+                this.updateStartingEquipmentInfo();
             });
         }
         
@@ -385,7 +387,6 @@ class TTCharacterGenerator {
         
         // Check if at maximum talents
         if (currentTalentCount >= maxTalents) {
-            // At max talents - need to replace one
             // Determine which talent pool to use
             let availableTalents = [];
             
@@ -426,13 +427,11 @@ class TTCharacterGenerator {
                 this.elements.newTalent.value = randomTalent;
                 this.updateTalentsList();
                 
-                // Silently replace without alert
                 setTimeout(() => {
                     this.elements.newTalent.value = '';
                 }, 1000);
             }
         } else {
-            // Below max talents - can add new talent
             let availableTalents = [];
             
             if (isRogue && isEvenLevel) {
@@ -537,7 +536,6 @@ class TTCharacterGenerator {
         // Choose a weight in the range (middle value)
         const weight = Math.round(weightMin + (weightMax - weightMin) / 2);
         
-        // Update fields
         this.character.height = height;
         this.character.weight = weight;
         this.elements.height.value = height;
@@ -637,35 +635,45 @@ class TTCharacterGenerator {
         // Clear existing options
         kindredSelect.innerHTML = '<option value="">Select Kindred</option>';
         
-        // Add basic kindreds
-        const basicKindreds = [
-            { value: 'human', name: 'Human', title: '1× all attributes, second chance on failed saving rolls' },
-            { value: 'dwarf', name: 'Dwarf', title: '2× STR & CON, 0.75× LK, 0.67× height, 2× weight' },
-            { value: 'elf', name: 'Elf', title: '0.67× CON, 1.33× DEX, 1.5× IQ/WIZ/CHA, 1.10× height' },
-            { value: 'hobb', name: 'Hobb', title: '0.5× STR, 2× CON, 1.5× DEX/LK, 0.5× height, 0.75× weight' },
-            { value: 'fairy', name: 'Fairy', title: '0.25× STR/CON, 1.75× DEX, 1.5× LK/CHA, 2× WIZ, 0.10× height, 0.01× weight' },
-            { value: 'leprechaun', name: 'Leprechaun', title: '0.33× STR, 0.67× CON, 1.5× DEX/LK/WIZ, 1.25× IQ, 0.33× height, 0.10× weight' }
-        ];
+        // Get available kindreds based on elaborations setting
+        const availableKindreds = this.character.getAvailableKindreds(this.elaborationsEnabled);
         
+        // Separate basic and elaborate kindreds
+        const basicKindreds = [];
+        const elaborateKindreds = [];
+        
+        availableKindreds.forEach(key => {
+            const kindredData = this.character.kindredData[key];
+            const kindredInfo = {
+                value: key,
+                name: kindredData.name,
+                description: kindredData.description,
+                isElaborate: kindredData.isElaborate
+            };
+            
+            if (kindredData.isElaborate) {
+                elaborateKindreds.push(kindredInfo);
+            } else {
+                basicKindreds.push(kindredInfo);
+            }
+        });
+        
+        // Add basic kindreds
+        basicKindreds.sort((a, b) => a.name.localeCompare(b.name));
         basicKindreds.forEach(kindred => {
             const option = document.createElement('option');
             option.value = kindred.value;
             option.textContent = kindred.name;
-            option.title = kindred.title;
+            option.title = kindred.description;
             kindredSelect.appendChild(option);
         });
         
-        // Add elaborate kindreds if enabled
-        if (this.elaborationsEnabled) {
-            // Create optgroup for elaborate kindreds
+        // Add elaborate kindreds if any
+        if (elaborateKindreds.length > 0) {
             const optgroup = document.createElement('optgroup');
             optgroup.label = '— Elaborate Kindreds —';
             
-            // Sort elaborate kindreds by name
-            const elaborateKindreds = Object.entries(this.character.elaborateKindredData)
-                .map(([key, data]) => ({ value: key, ...data }))
-                .sort((a, b) => a.name.localeCompare(b.name));
-            
+            elaborateKindreds.sort((a, b) => a.name.localeCompare(b.name));
             elaborateKindreds.forEach(kindred => {
                 const option = document.createElement('option');
                 option.value = kindred.value;
@@ -696,7 +704,6 @@ class TTCharacterGenerator {
         this.elements.level.value = this.character.level;
         this.elements.gold.value = this.character.gold;
         
-        // Update dropdowns based on elaborations
         this.updateKindredOptions();
         
         Object.keys(this.attributeElements).forEach(attr => {
@@ -741,21 +748,42 @@ class TTCharacterGenerator {
         // Clear existing options
         classSelect.innerHTML = '<option value="">Select Type</option>';
         
-        // Basic classes
-        const basicClasses = [
-            { value: 'warrior', name: 'Warrior', title: 'Weapon/armor bonuses, no magic ability' },
-            { value: 'rogue', name: 'Rogue', title: 'Can use weapons and magic, starts with 2 talents' },
-            { value: 'wizard', name: 'Wizard', title: 'Knows all 1st level spells, limited to 2d6 weapons' },
-            { value: 'specialist', name: 'Specialist', title: 'Must roll triples on an attribute, has exceptional abilities' }
-        ];
+        // Get all class keys that should be shown
+        const allClassKeys = Object.keys(this.character.classData).filter(key => {
+            const classInfo = this.character.classData[key];
+            return !classInfo.isElaborate || this.elaborationsEnabled;
+        });
         
+        // Separate basic and elaborate classes
+        const basicClasses = [];
+        const elaborateClasses = [];
+        
+        allClassKeys.forEach(key => {
+            const classData = this.character.classData[key];
+            const classInfo = {
+                value: key,
+                name: classData.name,
+                description: classData.description,
+                isElaborate: classData.isElaborate,
+                canSelect: availableClasses.includes(key)
+            };
+            
+            if (classData.isElaborate) {
+                elaborateClasses.push(classInfo);
+            } else {
+                basicClasses.push(classInfo);
+            }
+        });
+        
+        // Add basic classes
         basicClasses.forEach(cls => {
             const option = document.createElement('option');
             option.value = cls.value;
             option.textContent = cls.name;
-            option.title = cls.title;
+            const classData = this.character.classData[cls.value];
+            option.title = classData.summary || cls.description;
             
-            if (!availableClasses.includes(cls.value)) {
+            if (!cls.canSelect) {
                 option.disabled = true;
                 
                 // Add specific disabled reasons
@@ -771,24 +799,20 @@ class TTCharacterGenerator {
             classSelect.appendChild(option);
         });
         
-        // Add elaborate classes if enabled
-        if (this.elaborationsEnabled) {
+        // Add elaborate classes if any
+        if (elaborateClasses.length > 0) {
             const optgroup = document.createElement('optgroup');
             optgroup.label = '— Elaborate Types —';
-            
-            const elaborateClasses = [
-                { value: 'citizen', name: 'Citizen', title: 'Average folk with no special training' },
-                { value: 'paragon', name: 'Paragon', title: 'Combined warrior and wizard abilities' }
-            ];
             
             elaborateClasses.forEach(cls => {
                 const option = document.createElement('option');
                 option.value = cls.value;
                 option.textContent = cls.name;
-                option.title = cls.title;
+                const classData = this.character.classData[cls.value];
+                option.title = classData.summary || cls.description;
                 option.className = 'elaborate-option';
                 
-                if (!availableClasses.includes(cls.value)) {
+                if (!cls.canSelect) {
                     option.disabled = true;
                     
                     // Add specific disabled reasons
@@ -925,7 +949,6 @@ class TTCharacterGenerator {
     addTalent() {
         const talentName = this.elements.newTalent.value.trim();
         
-        // Check if at max talents
         const maxTalents = this.character.getMaxTalents();
         if (this.character.talents.length >= maxTalents) {
             const msg = `Cannot add more talents. Maximum allowed: ${maxTalents} (based on level ${this.character.level} as ${this.character.characterClass || 'no type'})`;
@@ -1027,560 +1050,22 @@ class TTCharacterGenerator {
     }
     
     exportPDF() {
-        // Create a new window with the character sheet formatted for printing
-        const printWindow = window.open('', '_blank');
-        const character = this.character;
-        const kindredName = character.kindredData[character.kindred]?.name || 'Unknown';
-        const className = character.classData[character.characterClass]?.name || 'Unknown';
+        if (!this.validateAndShowErrors()) {
+            return;
+        }
         
-        // Get equipment lists
-        const weaponsLines = [];
-        character.equipment.weapons.forEach(w => {
-            const itemName = typeof w === 'string' ? w : w.name;
-            const itemData = typeof w === 'object' ? w.data : null;
-            if (itemData && itemData.damage) {
-                weaponsLines.push(`${itemName} (${itemData.damage})`);
+        try {
+            this.pdfGenerator.generatePDF(this.character);
+            this.announceToScreenReader('PDF export window opened');
+        } catch (error) {
+            if (error.message.includes('popup blocker')) {
+                alert('Please allow popups for this website to export PDF');
             } else {
-                weaponsLines.push(itemName);
+                alert('Failed to generate PDF. Please try again.');
+                console.error('PDF export error:', error);
             }
-        });
-        
-        const armorLines = [];
-        character.equipment.armor.forEach(a => {
-            const itemName = typeof a === 'string' ? a : a.name;
-            const itemData = typeof a === 'object' ? a.data : null;
-            if (itemData && itemData.hits) {
-                armorLines.push(`${itemName} (${itemData.hits} hits)`);
-            } else {
-                armorLines.push(itemName);
-            }
-        });
-        
-        const equipmentLines = character.equipment.items.slice();
-        
-        // Combine armor and other equipment
-        const allEquipment = [...armorLines, ...equipmentLines];
-        
-        // Get talents
-        const talents = character.talents.slice();
-        
-        // Calculate weights
-        let wtPossible = Math.floor(character.attributes.str.current * 100);
-        let wtCarried = 0;
-        
-        character.equipment.weapons.forEach(w => {
-            if (typeof w === 'object' && w.data && w.data.weight) {
-                wtCarried += parseFloat(w.data.weight) || 0;
-            }
-        });
-        character.equipment.armor.forEach(a => {
-            if (typeof a === 'object' && a.data && a.data.weight) {
-                wtCarried += parseFloat(a.data.weight) || 0;
-            }
-        });
-        
-        const html = `
-<!DOCTYPE html>
-<html>
-<head>
-    <title>${character.name || 'Character'} - T&T Character Sheet</title>
-    <style>
-        @page {
-            size: letter;
-            margin: 0.3in;
+            this.announceToScreenReader('PDF export failed');
         }
-        @media print {
-            body { 
-                margin: 0;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-        }
-        body {
-            font-family: 'Times New Roman', Times, serif;
-            font-size: 11px;
-            line-height: 1.2;
-            margin: 0;
-            padding: 10px;
-            background: white;
-        }
-        .sheet {
-            width: 7.5in;
-            margin: 0 auto;
-            border: 3px solid black;
-            padding: 15px;
-            position: relative;
-        }
-        .decorative-border {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            bottom: 5px;
-            left: 5px;
-            border: 1px solid black;
-            pointer-events: none;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 10px;
-        }
-        .header h1 {
-            font-size: 26px;
-            font-weight: bold;
-            margin: 0;
-            font-family: 'Arial Black', sans-serif;
-            letter-spacing: -1px;
-        }
-        .header h2 {
-            font-size: 16px;
-            margin: 0;
-            font-weight: bold;
-            letter-spacing: 2px;
-        }
-        .logo {
-            position: absolute;
-            top: 10px;
-            right: 20px;
-            width: 60px;
-            height: 60px;
-            background: white;
-            border: 2px solid black;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-        }
-        .basic-info {
-            margin-bottom: 10px;
-        }
-        .portrait-box {
-            border: 2px solid black;
-            height: 140px;
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            color: #999;
-            font-style: italic;
-            margin-bottom: 6px;
-        }
-        .info-row {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 6px;
-        }
-        .info-item {
-            flex: 1;
-            display: flex;
-            align-items: baseline;
-        }
-        .info-label {
-            font-weight: bold;
-            text-transform: uppercase;
-            font-size: 11px;
-            margin-right: 5px;
-        }
-        .info-value {
-            border-bottom: 1px solid black;
-            flex: 1;
-            padding: 0 2px;
-            min-height: 16px;
-        }
-        .main-columns {
-            display: flex;
-            gap: 15px;
-        }
-        .left-column {
-            flex: 1;
-        }
-        .right-column {
-            flex: 1.1;
-        }
-        .section-title {
-            font-weight: bold;
-            text-align: center;
-            border: 2px solid black;
-            padding: 3px;
-            margin-bottom: 8px;
-            background: white;
-            font-size: 11px;
-            letter-spacing: 1px;
-        }
-        .attributes-container {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 8px;
-        }
-        .physical-attrs, .mental-attrs {
-            flex: 1;
-        }
-        .attr-group-label {
-            font-style: italic;
-            text-align: center;
-            font-size: 10px;
-            margin-bottom: 5px;
-        }
-        .attribute-row {
-            display: flex;
-            align-items: stretch;
-            border: 1px solid black;
-            margin-bottom: -1px;
-            height: 24px;
-        }
-        .attr-box {
-            width: 32px;
-            border-right: 1px solid black;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-        }
-        .attr-label {
-            flex: 1;
-            padding: 0 5px;
-            display: flex;
-            align-items: center;
-            font-size: 11px;
-        }
-        .attr-name {
-            font-weight: bold;
-            font-size: 13px;
-        }
-        .attr-full {
-            font-size: 9px;
-            margin-left: 3px;
-        }
-        .attr-value-box {
-            width: 40px;
-            border-left: 1px solid black;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            font-weight: bold;
-        }
-        .combat-adds {
-            border: 2px solid black;
-            padding: 6px;
-            text-align: center;
-            margin-bottom: 8px;
-        }
-        .combat-adds-label {
-            font-size: 10px;
-            font-weight: bold;
-        }
-        .combat-adds-value {
-            font-size: 18px;
-            font-weight: bold;
-            margin: 3px 0;
-        }
-        .combat-adds-note {
-            font-size: 8px;
-            font-style: italic;
-            line-height: 1.1;
-        }
-        .weight-section {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 8px;
-        }
-        .weight-box {
-            flex: 1;
-            text-align: center;
-        }
-        .weight-label {
-            font-size: 10px;
-            font-weight: bold;
-        }
-        .weight-value {
-            border-bottom: 1px solid black;
-            margin-top: 2px;
-            padding: 2px;
-            font-size: 12px;
-        }
-        .equipment-section {
-            margin-bottom: 8px;
-        }
-        .weapons-section {
-            margin-bottom: 8px;
-        }
-        .equipment-lines {
-            border: 1px solid black;
-            padding: 5px;
-        }
-        .equipment-lines.tall {
-            padding-bottom: 7px;
-        }
-        .ap-box {
-            border: 2px solid black;
-            padding: 4px 8px;
-            margin-bottom: 6px;
-            margin-left: 0;
-            margin-right: 0;
-        }
-        .ap-header {
-            font-weight: bold;
-            font-size: 10px;
-            text-align: left;
-            letter-spacing: 1px;
-        }
-        .talents-section, .spells-section {
-            margin-bottom: 8px;
-        }
-        .section-lines {
-            border: 1px solid black;
-            padding: 5px;
-        }
-        .line {
-            border-bottom: 1px solid #ccc;
-            height: 16px;
-            margin-bottom: 2px;
-            font-size: 10px;
-            padding: 1px 2px;
-        }
-        .line:last-child {
-            border-bottom: none;
-        }
-        .weapons-lines {
-            border: 1px solid black;
-            padding: 5px;
-        }
-        .footer {
-            margin-top: 15px;
-            font-size: 9px;
-            text-align: center;
-            font-style: italic;
-        }
-        .note-text {
-            font-size: 9px;
-            font-style: italic;
-            text-align: right;
-            margin-top: 5px;
-        }
-    </style>
-</head>
-<body>
-    <div class="sheet">
-        <div class="decorative-border"></div>
-        <div class="logo">🐉</div>
-        
-        <div class="header">
-            <h1>TUNNELS & TROLLS</h1>
-            <h2>CHARACTER SHEET</h2>
-        </div>
-        
-        <div class="basic-info">
-            <div class="info-row">
-                <div class="info-item" style="flex: 2;">
-                    <span class="info-label">NAME:</span>
-                    <span class="info-value">${character.name || ''}</span>
-                </div>
-            </div>
-            <div class="info-row">
-                <div class="info-item">
-                    <span class="info-label">KINDRED:</span>
-                    <span class="info-value">${kindredName}</span>
-                </div>
-                <div class="info-item" style="flex: 0.5;">
-                    <span class="info-label">LEVEL:</span>
-                    <span class="info-value">${character.level}</span>
-                </div>
-            </div>
-            <div class="info-row">
-                <div class="info-item" style="flex: 2;">
-                    <span class="info-label">CHARACTER TYPE:</span>
-                    <span class="info-value">${className}</span>
-                </div>
-            </div>
-            <div class="info-row">
-                <div class="info-item">
-                    <span class="info-label">GENDER:</span>
-                    <span class="info-value">${character.gender || ''}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">HEIGHT:</span>
-                    <span class="info-value">${character.height || ''}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">WEIGHT:</span>
-                    <span class="info-value">${character.weight || ''}</span>
-                </div>
-            </div>
-            <div class="info-row">
-                <div class="info-item">
-                    <span class="info-label">AGE:</span>
-                    <span class="info-value">${character.age || ''}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">HAIR:</span>
-                    <span class="info-value">${character.hair || ''}</span>
-                </div>
-                <div class="info-item">
-                    <span class="info-label">MONEY:</span>
-                    <span class="info-value">${character.gold} gp</span>
-                </div>
-            </div>
-        </div>
-        
-        <div class="main-columns">
-            <div class="left-column">
-                <div class="section-title">PRIME ATTRIBUTES:</div>
-                
-                <div class="attributes-container">
-                    <div class="physical-attrs">
-                        <div class="attr-group-label">Physical</div>
-                        <div class="attribute-row">
-                            <div class="attr-box">▢</div>
-                            <div class="attr-label">
-                                <span class="attr-name">STR</span>
-                                <span class="attr-full">Strength*</span>
-                            </div>
-                            <div class="attr-value-box">${character.attributes.str.current}</div>
-                        </div>
-                        <div class="attribute-row">
-                            <div class="attr-box">▢</div>
-                            <div class="attr-label">
-                                <span class="attr-name">CON</span>
-                                <span class="attr-full">Constitution</span>
-                            </div>
-                            <div class="attr-value-box">${character.attributes.con.current}</div>
-                        </div>
-                        <div class="attribute-row">
-                            <div class="attr-box">▢</div>
-                            <div class="attr-label">
-                                <span class="attr-name">DEX</span>
-                                <span class="attr-full">Dexterity*</span>
-                            </div>
-                            <div class="attr-value-box">${character.attributes.dex.current}</div>
-                        </div>
-                        <div class="attribute-row">
-                            <div class="attr-box">▢</div>
-                            <div class="attr-label">
-                                <span class="attr-name">SPD</span>
-                                <span class="attr-full">Speed*</span>
-                            </div>
-                            <div class="attr-value-box">${character.attributes.spd.current}</div>
-                        </div>
-                    </div>
-                    
-                    <div class="mental-attrs">
-                        <div class="attr-group-label">Mental</div>
-                        <div class="attribute-row">
-                            <div class="attr-box"></div>
-                            <div class="attr-label">
-                                <span class="attr-name">LK</span>
-                                <span class="attr-full">Luck*</span>
-                            </div>
-                            <div class="attr-value-box">${character.attributes.lk.current}</div>
-                        </div>
-                        <div class="attribute-row">
-                            <div class="attr-box"></div>
-                            <div class="attr-label">
-                                <span class="attr-name">IQ</span>
-                                <span class="attr-full">Intelligence</span>
-                            </div>
-                            <div class="attr-value-box">${character.attributes.iq.current}</div>
-                        </div>
-                        <div class="attribute-row">
-                            <div class="attr-box"></div>
-                            <div class="attr-label">
-                                <span class="attr-name">WIZ</span>
-                                <span class="attr-full">Wizardry</span>
-                            </div>
-                            <div class="attr-value-box">${character.attributes.wiz.current}</div>
-                        </div>
-                        <div class="attribute-row">
-                            <div class="attr-box"></div>
-                            <div class="attr-label">
-                                <span class="attr-name">CHA</span>
-                                <span class="attr-full">Charisma</span>
-                            </div>
-                            <div class="attr-value-box">${character.attributes.cha.current}</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="combat-adds">
-                    <div class="combat-adds-label">PERSONAL / COMBAT ADDS:</div>
-                    <div class="combat-adds-value">${character.calculateTotalAdds() >= 0 ? '+' : ''}${character.calculateTotalAdds()}</div>
-                    <div class="combat-adds-note">*Your character receives a BONUS of one point for each of the following attributes over 12: STR, LK, DEX & SPD.</div>
-                </div>
-                
-                <div class="weight-section">
-                    <div class="weight-box">
-                        <div class="weight-label">WT. POSSIBLE:</div>
-                        <div class="weight-value">${wtPossible}</div>
-                    </div>
-                    <div class="weight-box">
-                        <div class="weight-label">WT. CARRIED:</div>
-                        <div class="weight-value">${Math.floor(wtCarried)}</div>
-                    </div>
-                </div>
-                
-                <div class="equipment-section">
-                    <div class="section-title">EQUIPMENT:</div>
-                    <div class="equipment-lines tall">
-                        ${allEquipment.slice(0, 18).map(item => `<div class="line">${item}</div>`).join('')}
-                        ${allEquipment.length < 18 ? Array(18 - allEquipment.length).fill('<div class="line"></div>').join('') : ''}
-                    </div>
-                </div>
-            </div>
-            
-            <div class="right-column">
-                <div class="portrait-box">Character portrait</div>
-                <div class="ap-box">
-                    <div class="ap-header">ADVENTURE POINTS:</div>
-                </div>
-                
-                <div class="talents-section">
-                    <div class="section-title">TALENTS:</div>
-                    <div class="section-lines">
-                        ${talents.slice(0, 5).map(talent => `<div class="line">${talent}</div>`).join('')}
-                        ${talents.length < 5 ? Array(5 - talents.length).fill('<div class="line"></div>').join('') : ''}
-                    </div>
-                </div>
-                
-                <div class="weapons-section">
-                    <div class="section-title">WEAPONS:</div>
-                    <div class="section-lines">
-                        ${weaponsLines.slice(0, 6).map(weapon => `<div class="line">${weapon}</div>`).join('')}
-                        ${weaponsLines.length < 6 ? Array(6 - weaponsLines.length).fill('<div class="line"></div>').join('') : ''}
-                    </div>
-                </div>
-                
-                <div class="spells-section">
-                    <div class="section-title">SPELLS/MAGIC ITEMS:</div>
-                    <div class="section-lines">
-                        <div class="line"></div>
-                        <div class="line"></div>
-                        <div class="line"></div>
-                        <div class="line"></div>
-                        <div class="line"></div>
-                        <div class="line"></div>
-                        <div class="line"></div>
-                    </div>
-                </div>
-                
-                <div class="note-text">List additional items & spells on the back.</div>
-            </div>
-        </div>
-        
-        <div class="footer">
-            Permission to copy this page is granted by Flying Buffalo Inc.
-        </div>
-    </div>
-    
-    <script>
-        window.print();
-        setTimeout(() => window.close(), 1000);
-    </script>
-</body>
-</html>
-        `;
-        
-        printWindow.document.write(html);
-        printWindow.document.close();
     }
     
     validateAndShowErrors() {
@@ -1745,6 +1230,38 @@ class TTCharacterGenerator {
         } else {
             abilitiesList.innerHTML = abilities.map(ability => `<li>${ability}</li>`).join('');
         }
+    }
+    
+    updateStartingEquipmentInfo() {
+        const equipmentList = document.getElementById('starting-equipment-list');
+        if (!equipmentList) return;
+        
+        // Build equipment info from classData
+        const equipmentInfo = [];
+        
+        // Get all non-elaborate classes or elaborate if enabled
+        Object.keys(this.character.classData).forEach(key => {
+            const classInfo = this.character.classData[key];
+            if (!classInfo.isElaborate || this.elaborationsEnabled) {
+                const equipment = classInfo.equipment.join(', ');
+                const description = classInfo.equipmentDescription || '';
+                equipmentInfo.push({
+                    name: classInfo.name,
+                    equipment: equipment,
+                    description: description
+                });
+            }
+        });
+        
+        // Generate HTML
+        let html = equipmentInfo.map(info => {
+            return `<li><strong>${info.name}:</strong> ${info.equipment}${info.description ? ' - ' + info.description : ''}</li>`;
+        }).join('');
+        
+        // Add starting gold info
+        html += '<li><strong>Starting Gold:</strong> 3d6 × 10 gold pieces - Rolled automatically with attributes</li>';
+        
+        equipmentList.innerHTML = html;
     }
 }
 
