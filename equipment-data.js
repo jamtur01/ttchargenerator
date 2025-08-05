@@ -2,6 +2,287 @@
 // Based on official rules from the Deluxe T&T rulebook
 
 const EquipmentData = {
+    items: {
+        // General Supplies
+        'Backpack (Simple)': {
+            type: 'container',
+            weight: 20,
+            cost: 15, // 1g 5sp = 15sp = 1.5gp
+            description: 'Basic school-style backpack'
+        },
+        'Backpack (Deluxe)': {
+            type: 'container',
+            weight: 30,
+            cost: 13,
+            description: 'Frame backpack with side pouches, sturdy construction'
+        },
+        'Belt Pouch': {
+            type: 'container',
+            weight: 5,
+            cost: 2,
+            description: 'Small pouch that attaches to belt'
+        },
+        'Tuckerbag (Deluxe)': {
+            type: 'container',
+            weight: 15,
+            cost: 2,
+            description: 'Food storage bag'
+        },
+        'Water Skin': {
+            type: 'container',
+            weight: 2, // empty, 40 when full
+            cost: 0.6, // 6sp
+            description: 'Holds 36 oz of liquid (weight 40 when full)'
+        },
+        'Sack (Small)': {
+            type: 'container',
+            weight: 3,
+            cost: 0.5, // 5sp
+            description: 'Pillowcase-sized cloth sack'
+        },
+        'Chest (Large)': {
+            type: 'container',
+            weight: 250,
+            cost: 40,
+            description: 'Large wooden chest with iron reinforcement'
+        },
+        'Box (Small)': {
+            type: 'container',
+            weight: 80,
+            cost: 3,
+            description: 'Small wood and iron box (banker box size)'
+        },
+        
+        // Light Sources
+        'Torch': {
+            type: 'light',
+            weight: 2,
+            cost: 0.1, // 1sp
+            description: 'Burns for 10 turns (100 minutes)'
+        },
+        'Lantern (Brass)': {
+            type: 'light',
+            weight: 20,
+            cost: 15,
+            description: 'Requires lamp oil, 10 oz lasts 50 turns'
+        },
+        'Lamp Oil (50 oz)': {
+            type: 'consumable',
+            weight: 15,
+            cost: 10,
+            description: 'Fuel for lanterns, 50 oz in flask'
+        },
+        'Candle (Wax)': {
+            type: 'light',
+            weight: 1,
+            cost: 3,
+            description: 'Pack of 10, each lasts 5 turns'
+        },
+        'Matches (50)': {
+            type: 'tool',
+            weight: 2,
+            cost: 5,
+            description: '50 matches of dwarven make'
+        },
+        'Flint and Steel': {
+            type: 'tool',
+            weight: 2,
+            cost: 0.4, // 4sp
+            description: 'Fire starting kit'
+        },
+        'Tinder Box': {
+            type: 'tool',
+            weight: 4,
+            cost: 5,
+            description: 'Contains tinder for starting fires'
+        },
+        
+        // Rope and Climbing
+        'Rope (Hemp)': {
+            type: 'tool',
+            weight: 5, // per foot
+            cost: 0.4, // 4sp per foot
+            description: 'Half-inch thick hemp rope (price per foot)'
+        },
+        'Rope (Silk)': {
+            type: 'tool',
+            weight: 3, // per foot
+            cost: 1, // per foot
+            description: 'Quarter-inch thick silk rope (price per foot)'
+        },
+        'Heavy Twine (30 ft)': {
+            type: 'tool',
+            weight: 1,
+            cost: 1,
+            description: '30 feet of heavy twine'
+        },
+        'Iron Spike': {
+            type: 'tool',
+            weight: 25, // for 10
+            cost: 3,
+            description: 'Pack of 10 iron spikes or pitons'
+        },
+        'Piton Hammer': {
+            type: 'tool',
+            weight: 25,
+            cost: 15,
+            description: 'Hammer for driving pitons'
+        },
+        
+        // Writing Supplies
+        'Book (Blank)': {
+            type: 'writing',
+            weight: 10,
+            cost: 2,
+            description: 'Bound book with 50 blank sheets'
+        },
+        'Spellbook': {
+            type: 'writing',
+            weight: 10,
+            cost: 5,
+            description: 'Special book for recording spells'
+        },
+        'Pen (Steel)': {
+            type: 'writing',
+            weight: 1,
+            cost: 5,
+            description: 'Steel-nibbed writing pen'
+        },
+        'Pen (Quill)': {
+            type: 'writing',
+            weight: 1,
+            cost: 0.1, // 1sp
+            description: 'Feather quill pen'
+        },
+        'Ink (2 oz)': {
+            type: 'writing',
+            weight: 3,
+            cost: 1,
+            description: 'Stoppered bottle of ink'
+        },
+        'Parchment (10 sheets)': {
+            type: 'writing',
+            weight: 2,
+            cost: 3,
+            description: 'Bundle of 10 parchment sheets'
+        },
+        'Chalk (10 pieces)': {
+            type: 'writing',
+            weight: 3,
+            cost: 2,
+            description: '10 pieces in 5 colors'
+        },
+        
+        // Tools and Equipment
+        'Lockpicks': {
+            type: 'tool',
+            weight: 2,
+            cost: 5,
+            description: 'Set of 3 lock picking tools'
+        },
+        'Mirror (Small)': {
+            type: 'tool',
+            weight: 2,
+            cost: 2.5, // 2g 5sp
+            description: 'Small metal mirror'
+        },
+        'Scissors': {
+            type: 'tool',
+            weight: 2,
+            cost: 0.5, // 5sp
+            description: 'Cutting scissors'
+        },
+        'Sewing Needles': {
+            type: 'tool',
+            weight: 1,
+            cost: 1,
+            description: 'Set of 3 steel needles'
+        },
+        'Thread (20 yd)': {
+            type: 'tool',
+            weight: 1,
+            cost: 0.1, // 1sp
+            description: 'Waxed cotton thread, 20 yards'
+        },
+        'Pole (10 ft)': {
+            type: 'tool',
+            weight: 25,
+            cost: 2,
+            description: 'Seasoned wood pole, 10 feet long'
+        },
+        
+        // Magic Items
+        'Magic Staff (Ordinaire)': {
+            type: 'magical',
+            weight: 30,
+            cost: 100,
+            description: 'Basic wizard staff from the Guild'
+        },
+        'Magic Staff (Deluxe)': {
+            type: 'magical',
+            weight: 30,
+            cost: 5000,
+            description: 'High-quality enchanted wizard staff'
+        },
+        
+        // Packages
+        'Basic Delver Package': {
+            type: 'package',
+            weight: 130,
+            cost: 5,
+            description: 'Backpack, tuckerbag, water skin (full), 5 matches, 5 torches, 30\' twine, 2 chalk, 1 day trail food'
+        },
+        
+        // Clothing (as items, not armor)
+        'Robes': {
+            type: 'clothing',
+            weight: 25,
+            cost: 15,
+            description: 'Basic robes or tunic'
+        },
+        'Wizard Robes': {
+            type: 'clothing',
+            weight: 22,
+            cost: 30,
+            description: 'Enchanted robes that stay clean'
+        },
+        'Cloak': {
+            type: 'clothing',
+            weight: 30,
+            cost: 10,
+            description: 'Ankle-length cloak'
+        },
+        'Cloak with Hood': {
+            type: 'clothing',
+            weight: 31,
+            cost: 13,
+            description: 'Ankle-length hooded cloak'
+        },
+        'Boots (Ankle)': {
+            type: 'clothing',
+            weight: 10,
+            cost: 10,
+            description: 'Ankle-high boots'
+        },
+        'Boots (Knee)': {
+            type: 'clothing',
+            weight: 25,
+            cost: 16,
+            description: 'Knee-high boots'
+        },
+        'Gloves (Leather)': {
+            type: 'clothing',
+            weight: 5,
+            cost: 10,
+            description: 'Leather gloves'
+        },
+        'Belt (Leather)': {
+            type: 'clothing',
+            weight: 2,
+            cost: 3,
+            description: 'Leather belt'
+        }
+    },
     weapons: {
         // Swords
         'Short Sword': {

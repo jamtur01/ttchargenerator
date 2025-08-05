@@ -168,9 +168,10 @@ class TTCharacterGenerator {
             this.character.name = e.target.value;
         });
         
-        // Bind typeahead events for weapons and armor
+        // Bind typeahead events for weapons, armor, and items
         this.initializeTypeahead('weapon', this.elements.newWeapon, 'weapon-typeahead', EquipmentData.weapons);
         this.initializeTypeahead('armor', this.elements.newArmor, 'armor-typeahead', EquipmentData.armor);
+        this.initializeTypeahead('item', this.elements.newItem, 'item-typeahead', EquipmentData.items);
         
         this.elements.kindred.addEventListener('change', (e) => {
             this.character.kindred = e.target.value;
@@ -878,15 +879,14 @@ class TTCharacterGenerator {
             const itemElement = document.createElement('div');
             itemElement.className = 'equipment-item';
             
-            if (category === 'items' || typeof item === 'string') {
-                // Simple items without data
-                const itemName = typeof item === 'string' ? item : item.name;
+            // Check if this is a simple string item (no data)
+            if (typeof item === 'string') {
                 itemElement.innerHTML = `
-                    <span>${itemName}</span>
-                    <button class="equipment-remove" onclick="app.removeEquipment('${category}', '${itemName}')">×</button>
+                    <span>${item}</span>
+                    <button class="equipment-remove" onclick="app.removeEquipment('${category}', '${item}')">×</button>
                 `;
-            } else {
-                // Weapons and armor with data
+            } else if (item.data) {
+                // Items with data (weapons, armor, or items from database)
                 const itemName = item.name;
                 const itemData = item.data;
                 
@@ -902,6 +902,16 @@ class TTCharacterGenerator {
                     // Add protection for armor
                     if (itemData.hits) {
                         attributes.push(`Protection: ${itemData.hits} hits`);
+                    }
+                    
+                    // Add type for items
+                    if (itemData.type && category === 'items') {
+                        attributes.push(`Type: ${itemData.type}`);
+                    }
+                    
+                    // Add cost
+                    if (itemData.cost) {
+                        attributes.push(`Cost: ${itemData.cost} gp`);
                     }
                     
                     // Add requirements
@@ -930,7 +940,13 @@ class TTCharacterGenerator {
                         attributes.push(`DEX penalty: ${itemData.dexPenalty}`);
                     }
                     
-                    attributesHtml = `<div class="equipment-attributes">${attributes.join(' • ')}</div>`;
+                    // Add description if present (mainly for items)
+                    if (itemData.description && category === 'items') {
+                        attributesHtml = `<div class="equipment-attributes">${attributes.join(' • ')}</div>
+                                         <div class="equipment-description">${itemData.description}</div>`;
+                    } else if (attributes.length > 0) {
+                        attributesHtml = `<div class="equipment-attributes">${attributes.join(' • ')}</div>`;
+                    }
                 }
                 
                 itemElement.innerHTML = `
@@ -938,6 +954,13 @@ class TTCharacterGenerator {
                         <span class="equipment-name">${itemName}</span>
                         ${attributesHtml}
                     </div>
+                    <button class="equipment-remove" onclick="app.removeEquipment('${category}', '${itemName}')">×</button>
+                `;
+            } else {
+                // Item object but without data
+                const itemName = item.name;
+                itemElement.innerHTML = `
+                    <span>${itemName}</span>
                     <button class="equipment-remove" onclick="app.removeEquipment('${category}', '${itemName}')">×</button>
                 `;
             }
@@ -1108,20 +1131,48 @@ class TTCharacterGenerator {
                 e.preventDefault();
                 currentIndex = Math.max(currentIndex - 1, -1);
                 this.highlightTypeaheadItem(items, currentIndex);
-            } else if (e.key === 'Enter' && currentIndex >= 0) {
-                e.preventDefault();
-                const selectedItem = items[currentIndex];
-                if (selectedItem) {
-                    const itemName = selectedItem.dataset.itemName;
-                    inputElement.value = itemName;
-                    dropdown.classList.remove('show');
-                    
-                    // Trigger add button click
-                    if (type === 'weapon') {
-                        this.elements.addWeapon.click();
-                    } else if (type === 'armor') {
-                        this.elements.addArmor.click();
+            } else if (e.key === 'Enter') {
+                if (currentIndex >= 0) {
+                    // User selected an item from dropdown
+                    e.preventDefault();
+                    const selectedItem = items[currentIndex];
+                    if (selectedItem) {
+                        const itemName = selectedItem.dataset.itemName;
+                        inputElement.value = itemName;
+                        dropdown.classList.remove('show');
+                        
+                        // Trigger add button click
+                        if (type === 'weapon') {
+                            this.elements.addWeapon.click();
+                        } else if (type === 'armor') {
+                            this.elements.addArmor.click();
+                        } else if (type === 'item') {
+                            this.elements.addItem.click();
+                        }
                     }
+                } else if (inputElement.value.trim()) {
+                    // No selection but text typed - try to find exact match (case-insensitive)
+                    const typedText = inputElement.value.trim();
+                    const exactMatch = Object.keys(dataSource).find(key => 
+                        key.toLowerCase() === typedText.toLowerCase()
+                    );
+                    
+                    if (exactMatch) {
+                        // Found exact match in database
+                        e.preventDefault();
+                        inputElement.value = exactMatch; // Use the correct case from database
+                        dropdown.classList.remove('show');
+                        
+                        // Trigger add button click
+                        if (type === 'weapon') {
+                            this.elements.addWeapon.click();
+                        } else if (type === 'armor') {
+                            this.elements.addArmor.click();
+                        } else if (type === 'item') {
+                            this.elements.addItem.click();
+                        }
+                    }
+                    // If no exact match, let default Enter behavior happen (will add as custom item)
                 }
             } else if (e.key === 'Escape') {
                 dropdown.classList.remove('show');
@@ -1197,15 +1248,25 @@ class TTCharacterGenerator {
         dropdown.querySelectorAll('.typeahead-item').forEach(item => {
             item.addEventListener('click', () => {
                 const itemName = item.dataset.itemName;
-                const inputElement = dropdown.id === 'weapon-typeahead' ? this.elements.newWeapon : this.elements.newArmor;
-                inputElement.value = itemName;
-                dropdown.classList.remove('show');
+                let inputElement;
+                let addButton;
                 
-                // Trigger add button click
+                // Determine which input and button to use based on dropdown ID
                 if (dropdown.id === 'weapon-typeahead') {
-                    this.elements.addWeapon.click();
-                } else {
-                    this.elements.addArmor.click();
+                    inputElement = this.elements.newWeapon;
+                    addButton = this.elements.addWeapon;
+                } else if (dropdown.id === 'armor-typeahead') {
+                    inputElement = this.elements.newArmor;
+                    addButton = this.elements.addArmor;
+                } else if (dropdown.id === 'item-typeahead') {
+                    inputElement = this.elements.newItem;
+                    addButton = this.elements.addItem;
+                }
+                
+                if (inputElement && addButton) {
+                    inputElement.value = itemName;
+                    dropdown.classList.remove('show');
+                    addButton.click();
                 }
             });
         });

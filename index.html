@@ -509,13 +509,18 @@
             <div class="equipment-section">
               <h3>Items</h3>
               <div class="equipment-input">
-                <input
-                  type="text"
-                  id="new-item"
-                  placeholder="Item name"
-                  autocomplete="off"
-                  aria-label="Enter item name"
-                />
+                <div class="typeahead-container">
+                  <input
+                    type="text"
+                    id="new-item"
+                    placeholder="Item name"
+                    autocomplete="off"
+                    aria-label="Enter item name"
+                    aria-autocomplete="list"
+                    aria-controls="item-typeahead"
+                  />
+                  <div id="item-typeahead" class="typeahead-dropdown"></div>
+                </div>
                 <button id="add-item" class="btn btn-small" aria-label="Add item to equipment list">Add</button>
               </div>
               <div id="items-list" class="equipment-list"></div>

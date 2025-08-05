@@ -759,35 +759,48 @@ class Character {
     addEquipment(category, itemName) {
         if (!this.equipment[category] || !itemName) return false;
         
-        if (category === 'items') {
-            // Simple items don't have data
-            this.equipment.items.push(itemName);
-            return true;
-        }
-        
-        // For weapons and armor, look up data
+        // Look up data for all categories now (weapons, armor, and items)
         if (window.EquipmentData) {
-            const dataSource = category === 'weapons' ? window.EquipmentData.weapons : window.EquipmentData.armor;
-            const itemData = dataSource[itemName];
+            let dataSource;
+            if (category === 'weapons') {
+                dataSource = window.EquipmentData.weapons;
+            } else if (category === 'armor') {
+                dataSource = window.EquipmentData.armor;
+            } else if (category === 'items') {
+                dataSource = window.EquipmentData.items;
+            }
+            
+            const itemData = dataSource ? dataSource[itemName] : null;
             
             if (itemData) {
+                // Item found in database, add with data
                 this.equipment[category].push({
                     name: itemName,
                     data: itemData
                 });
             } else {
-                // If not found in data, add without stats
+                // Not found in database, add as simple item
+                if (category === 'items') {
+                    // For items category, store as string if not in database
+                    this.equipment.items.push(itemName);
+                } else {
+                    // For weapons/armor, store as object with null data
+                    this.equipment[category].push({
+                        name: itemName,
+                        data: null
+                    });
+                }
+            }
+        } else {
+            // Fallback if EquipmentData not loaded
+            if (category === 'items') {
+                this.equipment.items.push(itemName);
+            } else {
                 this.equipment[category].push({
                     name: itemName,
                     data: null
                 });
             }
-        } else {
-            // Fallback if EquipmentData not loaded
-            this.equipment[category].push({
-                name: itemName,
-                data: null
-            });
         }
         
         return true;
@@ -797,9 +810,12 @@ class Character {
         if (!this.equipment[category]) return false;
         
         if (category === 'items') {
-            const index = this.equipment.items.indexOf(itemName);
-            if (index > -1) {
-                this.equipment.items.splice(index, 1);
+            // Items can be strings or objects
+            const stringIndex = this.equipment.items.findIndex(item => 
+                typeof item === 'string' ? item === itemName : item.name === itemName
+            );
+            if (stringIndex > -1) {
+                this.equipment.items.splice(stringIndex, 1);
                 return true;
             }
         } else {
